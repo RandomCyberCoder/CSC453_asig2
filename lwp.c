@@ -68,7 +68,7 @@ void rrRemove(thread victim){
     while(curThread != victim){
         curThread = curThread->sched_one;
     }
-    /*once the vicitm thread has been found, remove it from the scheduler.
+    /*once the victim thread has been found, remove it from the scheduler.
     and have the thread before it an after it point to one another.
     */
     thread prvThread = curThread->sched_two;
@@ -84,6 +84,7 @@ void rrRemove(thread victim){
         tail = prvThread;
     }
 
+    /*lower the thread count*/
     qLen -= 1;
 
 }

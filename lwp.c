@@ -1,5 +1,9 @@
-Header head = NULL
-Header tail = NULL
+#include "lwp.h"
+#include "fp.h"
+#include <stdlib.h>
+
+thread head = NULL;
+
 void rrInit(){
     //do we want to do anything here
 }

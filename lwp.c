@@ -6,17 +6,26 @@
 schedule_one is the next thread in the list
 schedule_two is the previous thread in the list
 */
+/*
+The thread at the start of the list is the next thread that
+will run
+*/
 
 thread head = NULL;
 thread tail = NULL;
 unsigned long qLen = 0;
 
 void rrInit(){
-    //do we want to do anything here
+    //do we want to do anything here?? Can't see why we would.
 }
 
-void rrShtudown(){
+void rrShutdown(){
     //do we want to do anything here?????
+    /*
+    we don't use any dynamic memory so maybe not.... if another scheduler
+    is given could this be useful?? I don't think we wan't any of that logic
+    here though.
+    */
 }
 
 void rrAdmit(thread new){
@@ -90,8 +99,33 @@ void rrRemove(thread victim){
 }
 
 thread rrNext(){
-    //return the thread at the start of the list and append it to the end;
-    //check for case of only 1 thread?
+    /*NOTE: the first thread in the list is the next thread that will run.*/
+
+    thread nextThread;
+    if(qLen == 1){
+        /*if there is only one thread available*/
+        return head;
+    }
+    else{
+        /*thread we will return*/
+        nextThread = head;
+
+        thread oldTailThread = tail;
+        thread newHeadThread = head->sched_one;
+
+        /*the tail is updated to the thread at the start of the list*/
+        oldTailThread->sched_one = head;
+        /*the current head of the list should be updated to point to the
+        old tail of the list and the next pointer (sched_one) should be null*/
+        head->sched_two = oldTailThread;
+        head->sched_one = NULL;
+        /*update the tail to point to the new tail and the head to point the
+        next thread in the list*/
+        tail = head;
+        head = newHeadThread;
+    }
+    
+    return nextThread;
 }
 
 int rrqlen(){

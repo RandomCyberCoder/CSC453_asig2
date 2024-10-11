@@ -52,16 +52,36 @@ void rrAdmit(thread new){
 }
 
 void rrRemove(thread victim){
-    //find the thread we want to remove
+    /*if the thread is the first victim*/
     if(victim == head){
         head = head->sched_one;
         qLen -= 1;
+        if(qLen == 0){
+            head == NULL;
+            tail == NULL;
+        }
         return;
     }
 
+    /*find the victim thread*/
     thread curThread = head;
     while(curThread != victim){
-
+        curThread = curThread->sched_one;
+    }
+    /*once the vicitm thread has been found, remove it from the scheduler.
+    and have the thread before it an after it point to one another.
+    */
+    thread prvThread = curThread->sched_two;
+    thread nxtThread = curThread->sched_one;
+    prvThread->sched_one = nxtThread;
+    if(nxtThread != NULL){
+        /*if the thread removed was no the last one in the list*/
+        nxtThread->sched_two = prvThread;
+    }
+    else{
+        /*if the thread removed was the last one in the list, update
+        the tail of the list*/
+        tail = prvThread;
     }
 
     qLen -= 1;

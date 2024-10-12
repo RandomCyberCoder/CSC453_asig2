@@ -1,7 +1,10 @@
 #include "lwp.h"
 #include "fp.h"
 #include <stdlib.h>
-
+#include <sys/mman.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
 /*
 schedule_one is the next thread in the list
 schedule_two is the previous thread in the list
@@ -115,12 +118,17 @@ thread rrNext(){
 
         /*the tail is updated to the thread at the start of the list*/
         oldTailThread->sched_one = head;
-        /*the current head of the list should be updated to point to the
-        old tail of the list and the next pointer (sched_one) should be null*/
+        /*
+        the current head of the list should be updated to point to the
+        old tail of the list and the next pointer (sched_one) should be 
+        null
+        */
         head->sched_two = oldTailThread;
         head->sched_one = NULL;
-        /*update the tail to point to the new tail and the head to point the
-        next thread in the list*/
+        /*
+        update the tail to point to the new tail and the head to point the
+        next thread in the list
+        */
         tail = head;
         head = newHeadThread;
     }
@@ -130,4 +138,35 @@ thread rrNext(){
 
 int rrqlen(){
     return qLen;
+}
+
+tid_t lwp_create(lwpfun fun,void *arg){
+    /*calculate howBig the stack size should be*/
+    /*stacks should be a multiple of the page size*/
+    size_t pageSize = _SC_PAGESIZE;
+    /*get the resource limits */
+    //check the following two lines of the code; delte this comment after
+    struct rlimit rlimStruct;
+    int retVal = getrlimit(RLIMIT_STACK, &rlimStruct);
+    /*
+    check if the RLIMIT_STACK exists or ? -> if the structures was set to 
+    RLIM_INFINITY; if the value of retVal is negative one that means the 
+    call to getrlimit() has failed
+    */
+    if(retVal == -1 || (&rlimStruct) == RLIM_INFINITY){
+        /*if no soft limit given, use a max stack size of
+        8 MB*/
+        size_t MB_8 = 8388608;
+        if((MB_8 % pageSize) != 0){
+
+        }
+
+    }
+    else{
+        rlim_t softResourceLimit = rlimStruct.rlim_cur;
+    }
+    size_t howBig = 0;
+    void *stackBase = mmap(NULL, howBig, PROT_READ | PROT_WRITE,
+                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
 }

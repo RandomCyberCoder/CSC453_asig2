@@ -19,12 +19,14 @@ thread head = NULL;
 thread tail = NULL;
 unsigned long qLen = 0;
 
-void rrInit(){
-    //do we want to do anything here?? Can't see why we would.
+void rrInit()
+{
+    // do we want to do anything here?? Can't see why we would.
 }
 
-void rrShutdown(){
-    //do we want to do anything here?????
+void rrShutdown()
+{
+    // do we want to do anything here?????
     /*
     we don't use any dynamic memory so maybe not.... if another scheduler
     is given could this be useful?? I don't think we wan't any of that logic
@@ -32,8 +34,10 @@ void rrShutdown(){
     */
 }
 
-void rrAdmit(thread new){
-    if(head == NULL){
+void rrAdmit(thread new)
+{
+    if (head == NULL)
+    {
         /*
         If there are no threads, initialize list
         with the new thread, assigning next and prev
@@ -46,7 +50,8 @@ void rrAdmit(thread new){
         new->sched_two = NULL;
         qLen = 1;
     }
-    else{
+    else
+    {
         /*
         If there are scheduled threads, set the
         next pointer of the tail thread
@@ -54,7 +59,7 @@ void rrAdmit(thread new){
         of the new thread to NULL, set the previous
         pointer of the new thread to the current tail,
         and update the tail pointer to the new thread.
-        Increment the number of ready processes 
+        Increment the number of ready processes
         */
         tail->sched_one = new;
         new->sched_one = NULL;
@@ -64,12 +69,19 @@ void rrAdmit(thread new){
     }
 }
 
-void rrRemove(thread victim){
+void rrRemove(thread victim)
+{
+    thread curThread;
+    thread prvThread;
+    thread nxtThread;
+
     /*if the thread is the first victim*/
-    if(victim == head){
+    if (victim == head)
+    {
         head = head->sched_one;
         qLen -= 1;
-        if(qLen == 0){
+        if (qLen == 0)
+        {
             head == NULL;
             tail == NULL;
         }
@@ -77,21 +89,24 @@ void rrRemove(thread victim){
     }
 
     /*find the victim thread*/
-    thread curThread = head;
-    while(curThread != victim){
+    curThread = head;
+    while (curThread != victim)
+    {
         curThread = curThread->sched_one;
     }
     /*once the victim thread has been found, remove it from the scheduler.
     and have the thread before it an after it point to one another.
     */
-    thread prvThread = curThread->sched_two;
-    thread nxtThread = curThread->sched_one;
+    prvThread = curThread->sched_two;
+    nxtThread = curThread->sched_one;
     prvThread->sched_one = nxtThread;
-    if(nxtThread != NULL){
+    if (nxtThread != NULL)
+    {
         /*if the thread removed was no the last one in the list*/
         nxtThread->sched_two = prvThread;
     }
-    else{
+    else
+    {
         /*if the thread removed was the last one in the list, update
         the tail of the list*/
         tail = prvThread;
@@ -99,29 +114,34 @@ void rrRemove(thread victim){
 
     /*lower the thread count*/
     qLen -= 1;
-
 }
 
-thread rrNext(){
+thread rrNext()
+{
     /*NOTE: the first thread in the list is the next thread that will run.*/
 
     thread nextThread;
-    if(qLen == 1){
+    thread oldTailThread;
+    thread newHeadThread;
+
+    if (qLen == 1)
+    {
         /*if there is only one thread available*/
         return head;
     }
-    else{
+    else
+    {
         /*thread we will return*/
         nextThread = head;
 
-        thread oldTailThread = tail;
-        thread newHeadThread = head->sched_one;
+        oldTailThread = tail;
+        newHeadThread = head->sched_one;
 
         /*the tail is updated to the thread at the start of the list*/
         oldTailThread->sched_one = head;
         /*
         the current head of the list should be updated to point to the
-        old tail of the list and the next pointer (sched_one) should be 
+        old tail of the list and the next pointer (sched_one) should be
         null
         */
         head->sched_two = oldTailThread;
@@ -133,10 +153,11 @@ thread rrNext(){
         tail = head;
         head = newHeadThread;
     }
-    
+
     return nextThread;
 }
 
-int rrqlen(){
+int rrqlen()
+{
     return qLen;
 }

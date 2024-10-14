@@ -256,8 +256,9 @@ tid_t lwp_create(lwpfun fun, void *arg)
     newThread->stack[howBig - PREV] = lwp_wrap;
     newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
 
-    /*Set rbp to the address of the top of the stack for
-    wrap to use once it is returned to*/
+    /*Set rbp to the address of the rbp reg on our stack
+    so that when it is popped inside leave and ret, it pops
+    our rbp filler value and then the address of lwp_wrap for ret*/
 
     newThread->state.rbp = (unsigned long)(getBaseLoc);
 
@@ -288,7 +289,9 @@ void lwp_start(void)
     }
 
     /*Initialize context. Stack attribtues are NULL
-    to indicate this is the original system thread*/
+    to indicate this is the original system thread
+    Register values of context don't matter because they will
+    be saved to the corret values when yield is called*/
 
     systemThread->tid = threadIdCounter++;
     systemThread->stack = NULL;
@@ -315,6 +318,7 @@ void lwp_start(void)
 void lwp_yield(void)
 {
     thread nextThread;
+    unsigned int status, retStatus;
     /*Yield control to the next LWP in the schedule*/
 
     /*Get the next thread from the scheduler*/
@@ -325,13 +329,52 @@ void lwp_yield(void)
 
     if (nextThread == NULL)
     {
+        /*Save exit status of calling thread*/
+
+        status = callingThread->status;
+
         /*Shutdown the scheduler if necessary*/
 
         if (currentScheduler->shutdown != NULL) 
         {
-            currentScheduler->shutdown;
+            currentScheduler->shutdown();
         }
-        exit(callingThread->status);
+
+        /*Remove calling thread from pool*/
+
+        remove_thread_from_pool(callingThread);
+
+        /*Deallocate the threads resources*/
+
+        /*If the thread is the system thread, 
+        do nothing about a stack and 
+        free the thread context*/
+
+        if (callingThread->stack == NULL)
+        {
+            free(callingThread);
+
+            /*Exit with syscall a*/
+
+            exit(status);
+        }
+
+        /*Otherwise, unmap its memory region, free the 
+        thread context, and exit*/
+
+        retStatus = munmap(callingThread->stack, callingThread->stacksize);
+
+        /*Check if munmap failed*/
+        if (retStatus == SYS_FAIL)
+        {
+            perror("Failed to unmap region");
+        }
+        
+        free(callingThread);
+
+        /*Exit with syscall a*/
+
+        exit(status);
     }
 
     /*Otherwise, swap contexts*/
@@ -342,14 +385,12 @@ void lwp_yield(void)
 void lwp_exit(int exitval)
 {
     thread currThread;
+
     /*Terminate the calling thread*/
-    /*Not entirely sure if this counts as terminating it or
-    if there's more to do. ASK NICO*/
 
     callingThread->status = LWP_TERM;
 
     /*Exit status of calling thread becomes low 8 bits of exitval*/
-    /*This might be wrong spec seems confusing ASK NICO*/
 
     callingThread->status = MKTERMSTAT(callingThread->status, exitval);
 
@@ -364,7 +405,9 @@ void lwp_exit(int exitval)
     if (terminated == NULL)
     {
         terminated = callingThread;
-    } else {
+    } 
+    else 
+    {
         /*Search for the end of the terminated list*/
 
         currThread = terminated;
@@ -515,6 +558,10 @@ tid_t lwp_wait(int *status)
 
     remove_thread_from_pool(currThread);
 
+    /*Update the terminated list*/
+
+    terminated = terminated->exited;
+
     /*Populate status if non-null*/
 
     if (status != NULL)
@@ -549,52 +596,67 @@ tid_t lwp_wait(int *status)
     return tid;
 }
 
-thread tid2thread(tid_t tid){
+thread tid2thread(tid_t tid)
+{
     thread checkThread = threadPool;
 
-    while(checkThread != NULL){
-        if(tid == checkThread->tid){
+    while(checkThread != NULL)
+    {
+        if(tid == checkThread->tid)
+        {
             return checkThread;
         }
-        else{
+        else
+        {
             checkThread = checkThread->lib_one;
         }
     }
 }
 
-tid_t lwp_gettid(void){
-    return callingThread->tid;
+tid_t lwp_gettid(void)
+{
+    if (callingThread != NULL)
+    {
+        return callingThread->tid;
+    }
+    return NO_THREAD;
 }
 
 
-scheduler lwp_set_scheduler(scheduler fun){
+scheduler lwp_set_scheduler(scheduler fun)
+{
     scheduler oldScheduler;
 
-    if(fun == NULL){
+    if(fun == NULL)
+    {
         return currentScheduler;
     }
 
     oldScheduler = currentScheduler;
     currentScheduler = fun; 
-    if(fun->init != NULL){
+    if(fun->init != NULL)
+    {
         fun->init();
     }   
 
 
     for(thread nxtThread = oldScheduler->next();
-        nxtThread != NULL; nxtThread = oldScheduler->next()){
+        nxtThread != NULL; nxtThread = oldScheduler->next())
+    {
         
         oldScheduler->remove(nxtThread);
         fun->admit(nxtThread);
     }
 
-    if(oldScheduler->shutdown != NULL){
+    if(oldScheduler->shutdown != NULL)
+    {
         oldScheduler->shutdown();
     }
     
     return currentScheduler;
 }
 
-scheduler lwp_get_scheduler(){
+scheduler lwp_get_scheduler()
+{
     return currentScheduler;
 }

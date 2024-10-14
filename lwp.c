@@ -389,3 +389,27 @@ tid_t lwp_wait(int *status)
     library pointers in the thread contexts and use them for
     waiting or terminated threads. ASK NICO*/
 }
+
+scheduler lwp_set_scheduler(scheduler sched){
+    scheduler oldScheduler = currentScheduler;
+    currentScheduler = sched; 
+    if(sched->init != NULL){
+        sched->init();
+    }   
+
+
+    for(thread nxtThread = oldScheduler->next();
+        nxtThread != NULL; nxtThread = oldScheduler->next()){
+        
+        oldScheduler->remove(nxtThread);
+        sched->admit(nxtThread);
+    }
+
+    if(oldScheduler->shutdown != NULL){
+        oldScheduler->shutdown();
+    }
+}
+
+scheduler lwp_get_scheduler(){
+    return currentScheduler;
+}

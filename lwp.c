@@ -26,7 +26,7 @@ lib_one is a next pointer for the next thread in a list
 lib_two is a prev pointer for the prev thread in a list
 */
 
-/*Create RoundRobin scheduler and set it to currentscheduler by default*/
+/*Create RoundRobin scheduler and set it to currentScheduler by default*/
 
 struct scheduler rr_publish = {NULL, NULL, rrAdmit, rrRemove, rrNext, rrqlen};
 scheduler currentScheduler = &rr_publish;
@@ -117,6 +117,7 @@ void add_thread_to_pool(thread newThread)
     if (threadPool == NULL)
     {
         threadPool = newThread;
+        newThread->lib_one = NULL; //ED added this line
         newThread->lib_two = NULL;
     }
     else
@@ -149,8 +150,20 @@ int remove_thread_from_pool(thread victim)
 
     /*If the only thread in the pool is the victim, set pool to NULL*/
 
+    //ED note I don't think this implies that the victim thread is the only
+    //...thread, only that it is the first thread in the pool
     if (threadPool == victim)
     {
+        /*
+        if(threadPool->lib_one == NULL){
+            threadPool = NULL
+            reutrn EXIT_SUCCESS
+        }
+        else{
+            threadPool = threadPool->lib_one;
+            threadPool->lib_two = NULL;
+        }
+        */
         threadPool = NULL;
         return EXIT_SUCCESS;
     }

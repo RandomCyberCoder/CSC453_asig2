@@ -22,32 +22,41 @@
 #define PREV 1
 
 /*
-schedule_one is the next thread in the list
-schedule_two is the previous thread in the list
+lib_one is a next pointer for the next thread in a list
+lib_two is a prev pointer for the prev thread in a list
 */
-/*
-The thread at the start of the list is the next thread that
-will run
-*/
+
+/*Create RoundRobin scheduler and set it to currentscheduler by default*/
 
 struct scheduler rr_publish = {NULL, NULL, rrAdmit, rrRemove, rrNext, rrqlen};
 scheduler currentScheduler = &rr_publish;
-thread curRunningThread = NULL;
-thread systemThread = NULL;
-unsigned long threadIdCounter = INIT;
 
+/*for global linked list of threads*/
+
+thread threadPool = NULL;
+thread callingThread; /*ASK NICO, will this even work? Seems iffy but how do we
+                        know what the calling thread is, or if we're calling
+                        functions from outside a thread*/
+
+/*Create id counter*/
+
+unsigned long threadIdCounter = INIT;
 
 size_t create_stackSizeHelper()
 {
+    /*Do we need to worry about 16 byte alignment? ASK NICO*/
     size_t pageSize, howBig, MB_8, multBy;
     struct rlimit rlimStruct;
     int retVal;
 
     /*stacks should be a multiple of the page size*/
+
     pageSize = _SC_PAGESIZE;
+
     /*get the soft & hard resource limits*/
 
     retVal = getrlimit(RLIMIT_STACK, &rlimStruct);
+
     /*
     check if the RLIMIT_STACK exists or if the
     soft constraint is set to RLIM_INFINITY; if the
@@ -61,11 +70,14 @@ size_t create_stackSizeHelper()
         if no soft limit given, use a stack
         size of 8 MB*
         */
+
         MB_8 = STACK_SIZE;
+
         /*
         make sure stack size is a multiple of
         memory page size
         */
+
         if ((MB_8 % pageSize) != EVEN_PAGE)
         {
             multBy = MB_8 / pageSize;
@@ -82,6 +94,7 @@ size_t create_stackSizeHelper()
         make sure soft resource limit is a multiple
         of the page size
         */
+
         if ((rlimStruct.rlim_cur % pageSize) != EVEN_PAGE)
         {
             multBy = rlimStruct.rlim_cur / pageSize;
@@ -96,11 +109,88 @@ size_t create_stackSizeHelper()
     return howBig;
 }
 
+void add_thread_to_pool(thread newThread)
+{
+    /*Add thread to thread pool or initialize head of list if it's NULL*/
+    thread currThread;
+
+    if (threadPool == NULL)
+    {
+        threadPool = newThread;
+        newThread->lib_two = NULL;
+    }
+    else
+    {
+        currThread = threadPool;
+        while (currThread->lib_one != NULL)
+        {
+            currThread = currThread->lib_one;
+        }
+        currThread->lib_one = newThread;
+        newThread->lib_two = currThread;
+    }
+
+    /*Regardless if thread is added to pool or initializing the pool
+    set its next pointer to NULL*/
+
+    newThread->lib_one = NULL;
+}
+
+int remove_thread_from_pool(thread victim)
+{
+    /*Remove thread from thread pool or
+    return -1 if it doesn't exist*/
+    thread currThread;
+
+    if (threadPool == NULL)
+    {
+        return SYS_FAIL;
+    }
+
+    /*If the only thread in the pool is the victim, set pool to NULL*/
+
+    if (threadPool == victim)
+    {
+        threadPool = NULL;
+        return EXIT_SUCCESS;
+    }
+
+    /*Search for the victim*/
+
+    currThread = threadPool;
+    while (currThread->lib_one != victim)
+    {
+        currThread = currThread->lib_one;
+
+        /*If you run out of threads without finding the victim return -1*/
+        if (currThread == NULL)
+        {
+            return SYS_FAIL;
+        }
+    }
+
+    /*If we're the last thread, just update the prev thread's next pointer*/
+
+    if (currThread->lib_one == NULL)
+    {
+        currThread->lib_two->lib_one = NULL;
+        return EXIT_SUCCESS;
+    }
+
+    /*Otherwise we're between two threads and need to update each*/
+
+    currThread->lib_two->lib_one = currThread->lib_one;
+    currThread->lib_one->lib_two = currThread->lib_two;
+
+    return EXIT_SUCCESS;
+}
+
 void lwp_wrap(lwpfun fun, void *arg)
 {
     /* Call the given lwpfunction with the given argument.
      * Calls lwp exit() with its return value
      */
+
     int rval;
     rval = fun(arg);
     lwp_exit(rval);
@@ -116,10 +206,12 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*create the threads context and stack*/
     /*calculate howBig the stack size will be*/
+
     howBig = create_stackSizeHelper();
     newThread = (thread)malloc(sizeof(thread));
 
     /*Check if malloc failed*/
+
     if (newThread == NULL)
     {
         return NO_THREAD;
@@ -129,6 +221,7 @@ tid_t lwp_create(lwpfun fun, void *arg)
                      MAP_PRIVATE | MAP_ANONYMOUS, NO_FD, NO_OFF);
 
     /*check if mmap failed*/
+
     if (stackBase == MAP_FAILED)
     {
         free(newThread);
@@ -137,13 +230,16 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*Store the address for lwp_wrap at the base of the stack
     so that when swaprfiles is called it returns to wrap
+
     Index into stack to set rdi and rsi to fun and arg so
     wrap gets called with the right arguments*/
 
     /*initialize the context*/
+
     newThread->tid = threadIdCounter++;
     newThread->stack = stackBase;
     newThread->stacksize = howBig;
+    newThread->status = LWP_LIVE;
     newThread->state.rdi = (unsigned long)fun;
     newThread->state.rsi = (unsigned long)arg;
     newThread->state.fxsave = FPU_INIT;
@@ -155,7 +251,9 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*"Push" the address of lwp_wrap to the top of the
     stack so that when ret happens, it pops this address
-    and returns to it to execute*/
+    and returns to it to execute
+    Also "Push" the sbp of the stack allocated by mmap
+    so it returns to the appropriate stack frame ASK NICO*/
 
     newThread->stack[howBig] = lwp_wrap;
     newThread->stack[howBig - PREV] = getBaseLoc;
@@ -165,44 +263,129 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     newThread->state.rbp = (unsigned long)getBaseLoc;
 
+    /*Add thread to thread pool*/
+
+    add_thread_to_pool(newThread);
+
     /*Admit the new thread to the scheduler*/
 
     currentScheduler->admit(newThread);
 }
 
-void lwp_start(){
+void lwp_start(void)
+{
+    thread systemThread;
+
     /*transform calling thread(the system thread)
     into a LWP. Set up its context and admit() it
     to the scheduler. Don't allocate stack!
     IMPORTANT: DON'T DEALLOCATE THIS LWP!!!! */
     systemThread = (thread)malloc(sizeof(thread));
-    if(systemThread == NULL){
+    if (systemThread == NULL)
+    {
         errno = ENOMEM;
         perror("lwp_start() malloc() for thread context failed");
     }
-    //I think this next line is wrong because when we load it back
-    //it will try to run from this place and try to admit itself to the
-    //scheduler again. So what do we do.......
-    swap_rfiles(&(systemThread->state), NULL);
-    currentScheduler->admit(systemThread);
-    curRunningThread = currentScheduler->next();
-    swap_rfiles(NULL, &(curRunningThread->state));
 
-    //proposed solution
-    //admit the thread to the scheduler
-    //check what the next thread should be according to the scheduler
-    //if the next thread is the system thread we just created then
-    //there is not context to setup. the rfile is only needed to load
-    //a threads context who got suspended, but the system thread never did so
-    //we don't need to set up its context... I think
-    //IF the next thread to run is not the system thread then we can save it's
-    //context and because this is the last line of code in the function, the
-    //system thread will return back to the caller
+    /*Initialize context. Stack attribtues are NULL
+    to indicate this is the original system thread*/
+
+    systemThread->tid = threadIdCounter++;
+    systemThread->stack = NULL;
+    systemThread->stacksize = NULL;
+    systemThread->status = LWP_LIVE; /*ASK NICO*/
+
+    /*Add thread to pool*/
+
+    add_thread_to_pool(systemThread);
+
+    /*Admit thread to scheduler*/
+
     currentScheduler->admit(systemThread);
-    curRunningThread = currentScheduler->next();
-    if(curRunningThread != systemThread){
-        swap_rfiles(&(systemThread->state), &(curRunningThread->state));
+
+    /*Set callingThread*/
+
+    callingThread = systemThread;
+
+    /*Yield control to thread picked by scheduler*/
+
+    lwp_yield();
+}
+
+void lwp_yield(void)
+{
+    thread nextThread;
+    /*Yield control to the next LWP in the schedule*/
+
+    /*Get the next thread from the scheduler*/
+
+    nextThread = currentScheduler->next();
+
+    /*If there is no next thread, terminate the program*/
+
+    if (nextThread == NULL)
+    {
+        exit(callingThread->status);
     }
-    
 
+    /*Otherwise, swap contexts*/
+
+    swap_rfiles(&(callingThread->state), &(nextThread->state));
+}
+
+void lwp_exit(int exitval)
+{
+    /*Terminate the calling thread*/
+    /*Not entirely sure if this counts as terminating it or
+    if there's more to do. ASK NICO*/
+
+    callingThread->status = LWP_TERM;
+
+    /*Exit status of calling thread becomes low 8 bits of exitval*/
+    /*This might be wrong spec seems confusing ASK NICO*/
+
+    callingThread->status = MKTERMSTAT(callingThread->status, exitval);
+
+    /*Yield control to next thread*/
+
+    lwp_yield();
+}
+
+tid_t lwp_wait(int *status)
+{
+    thread currentThread;
+    int waitingCounter, threadCounter;
+
+    /*Search for terminated threads in the threadPool*/
+    currentThread = threadPool;
+
+    /*If there are no threads, return NO_THREAD*/
+
+    if (currentThread == NULL)
+    {
+        return NO_THREAD;
+    }
+
+    waitingCounter, threadCounter = 0;
+    while (!LWPTERMINATED(currentThread->status))
+    {
+        currentThread = threadPool->lib_one;
+
+        /*If we've reached the end of the pool, block
+        aka go back to the front and start again*/
+
+        if (currentThread == NULL)
+        {
+            currentThread = threadPool;
+        }
+    }
+
+    /*Not entirely sure the right direction to go
+    with the rest of this one. There's no good way
+    for us to see which threads are waiting currently.
+    We can either create a global linked list for waiting
+    processes, and then maybe another for terminated ones,
+    or get rid of the global thread pool that uses both the
+    library pointers in the thread contexts and use them for
+    waiting or terminated threads. ASK NICO*/
 }

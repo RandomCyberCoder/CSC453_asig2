@@ -403,17 +403,35 @@ tid_t lwp_wait(int *status)
     waiting or terminated threads. ASK NICO*/
 }
 
-scheduler lwp_set_scheduler(scheduler sched){
+thread tid2thread(tid_t tid){
+    thread checkThread = callingThread;
+
+    while(checkThread != NULL){
+        if(tid == checkThread->tid){
+            return checkThread;
+        }
+        else{
+            checkThread = checkThread->lib_one;
+        }
+    }
+}
+
+tid_t lwp_gettid(){
+    return callingThread->tid;
+}
+
+
+scheduler lwp_set_scheduler(scheduler fun){
     scheduler oldScheduler;
 
-    if(sched == NULL){
+    if(fun == NULL){
         return currentScheduler;
     }
 
     oldScheduler = currentScheduler;
-    currentScheduler = sched; 
-    if(sched->init != NULL){
-        sched->init();
+    currentScheduler = fun; 
+    if(fun->init != NULL){
+        fun->init();
     }   
 
 
@@ -421,7 +439,7 @@ scheduler lwp_set_scheduler(scheduler sched){
         nxtThread != NULL; nxtThread = oldScheduler->next()){
         
         oldScheduler->remove(nxtThread);
-        sched->admit(nxtThread);
+        fun->admit(nxtThread);
     }
 
     if(oldScheduler->shutdown != NULL){

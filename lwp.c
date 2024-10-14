@@ -404,7 +404,7 @@ tid_t lwp_wait(int *status)
 }
 
 thread tid2thread(tid_t tid){
-    thread checkThread = callingThread;
+    thread checkThread = threadPool;
 
     while(checkThread != NULL){
         if(tid == checkThread->tid){

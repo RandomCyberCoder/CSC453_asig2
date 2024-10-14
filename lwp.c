@@ -404,7 +404,13 @@ tid_t lwp_wait(int *status)
 }
 
 scheduler lwp_set_scheduler(scheduler sched){
-    scheduler oldScheduler = currentScheduler;
+    scheduler oldScheduler;
+
+    if(sched == NULL){
+        return currentScheduler;
+    }
+
+    oldScheduler = currentScheduler;
     currentScheduler = sched; 
     if(sched->init != NULL){
         sched->init();
@@ -421,6 +427,8 @@ scheduler lwp_set_scheduler(scheduler sched){
     if(oldScheduler->shutdown != NULL){
         oldScheduler->shutdown();
     }
+    
+    return currentScheduler;
 }
 
 scheduler lwp_get_scheduler(){

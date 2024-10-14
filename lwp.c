@@ -2,6 +2,7 @@
 #include "fp.h"
 #include "roundRobin.h"
 #include <stdlib.h>
+#include <stdint.h>
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -10,6 +11,13 @@
 
 #define STACK_SIZE 8388608
 #define MAP_ANONYMOUS 0x20
+#define ADDRESS_SIZE 8
+#define SYS_FAIL -1
+#define NO_FD -1
+#define EVEN_PAGE 0
+#define NO_OFF 0
+#define INIT 1
+#define PREV 1
 
 /*
 schedule_one is the next thread in the list
@@ -21,9 +29,9 @@ will run
 */
 
 struct scheduler rr_publish = {NULL, NULL, rrAdmit, rrRemove, rrNext, rrqlen};
-scheduler RoundRobin = &rr_publish;
+scheduler currentScheduler = &rr_publish;
 
-unsigned long threadIdCounter = 1;
+unsigned long threadIdCounter = INIT;
 
 size_t create_stackSizeHelper()
 {
@@ -42,8 +50,8 @@ size_t create_stackSizeHelper()
     value of retVal is negative one that means the
     call to getrlimit() has failed
     */
-    howBig = 0;
-    if (retVal == -1 || rlimStruct.rlim_cur == RLIM_INFINITY)
+
+    if (retVal == SYS_FAIL || rlimStruct.rlim_cur == RLIM_INFINITY)
     {
         /*
         if no soft limit given, use a stack
@@ -54,7 +62,7 @@ size_t create_stackSizeHelper()
         make sure stack size is a multiple of
         memory page size
         */
-        if ((MB_8 % pageSize) != 0)
+        if ((MB_8 % pageSize) != EVEN_PAGE)
         {
             multBy = MB_8 / pageSize;
             howBig = pageSize * (multBy);
@@ -70,7 +78,7 @@ size_t create_stackSizeHelper()
         make sure soft resource limit is a multiple
         of the page size
         */
-        if ((rlimStruct.rlim_cur % pageSize) != 0)
+        if ((rlimStruct.rlim_cur % pageSize) != EVEN_PAGE)
         {
             multBy = rlimStruct.rlim_cur / pageSize;
             howBig = pageSize * multBy;
@@ -87,8 +95,10 @@ size_t create_stackSizeHelper()
 tid_t lwp_create(lwpfun fun, void *arg)
 {
     size_t howBig;
+    uintptr_t getBaseLoc;
     thread newThread;
     void *stackBase;
+    unsigned long *baseLoc;
 
     /*create the threads context and stack*/
     /*calculate howBig the stack size will be*/
@@ -102,7 +112,8 @@ tid_t lwp_create(lwpfun fun, void *arg)
     }
 
     stackBase = mmap(NULL, howBig, PROT_READ | PROT_WRITE,
-                     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+                     MAP_PRIVATE | MAP_ANONYMOUS, NO_FD, NO_OFF);
+
     /*check if mmap failed*/
     if (stackBase == MAP_FAILED)
     {
@@ -116,15 +127,32 @@ tid_t lwp_create(lwpfun fun, void *arg)
     wrap gets called with the right arguments*/
 
     /*initialize the context*/
-    newThread->tid = threadIdCounter;
-    threadIdCounter += 1;
+    newThread->tid = threadIdCounter++;
     newThread->stack = stackBase;
     newThread->stacksize = howBig;
     newThread->state.rdi = (unsigned long)fun;
     newThread->state.rsi = (unsigned long)arg;
 
     /*initialize the stack*/
-    newThread->stack[0] = lwp_wrap;
+
+    getBaseLoc = (uintptr_t)newThread->stack;
+    getBaseLoc += howBig - ADDRESS_SIZE;
+
+    /*"Push" the address of lwp_wrap to the top of the
+    stack so that when ret happens, it pops this address
+    and returns to it to execute*/
+
+    newThread->stack[howBig] = lwp_wrap;
+    newThread->stack[howBig - PREV] = getBaseLoc;
+
+    /*Set rbp to the address of the top of the stack for
+    wrap to use once it is returned to*/
+
+    newThread->state.rbp = (unsigned long)getBaseLoc;
+
+    /*Admit the new thread to the scheduler*/
+
+    currentScheduler->admit(newThread);
 }
 
 void lwp_wrap(lwpfun fun, void *arg)

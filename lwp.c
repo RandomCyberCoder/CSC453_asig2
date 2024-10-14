@@ -180,29 +180,51 @@ void lwp_start(){
         errno = ENOMEM;
         perror("lwp_start() malloc() for thread context failed");
     }
-    //I think this next line is wrong because when we load it back
-    //it will try to run from this place and try to admit itself to the
-    //scheduler again. So what do we do.......
+    
+    systemThread->tid = threadIdCounter++;
+    //systemThread->stacksize
+    //systemThread->stack
+    //does this line even need to be done??????
+    //it'll be done in lwp_yield
     swap_rfiles(&(systemThread->state), NULL);
     currentScheduler->admit(systemThread);
-    curRunningThread = currentScheduler->next();
-    swap_rfiles(NULL, &(curRunningThread->state));
-
-    //proposed solution
-    //admit the thread to the scheduler
-    //check what the next thread should be according to the scheduler
-    //if the next thread is the system thread we just created then
-    //there is not context to setup. the rfile is only needed to load
-    //a threads context who got suspended, but the system thread never did so
-    //we don't need to set up its context... I think
-    //IF the next thread to run is not the system thread then we can save it's
-    //context and because this is the last line of code in the function, the
-    //system thread will return back to the caller
-    currentScheduler->admit(systemThread);
-    curRunningThread = currentScheduler->next();
-    if(curRunningThread != systemThread){
-        swap_rfiles(&(systemThread->state), &(curRunningThread->state));
-    }
     
 
+}
+
+void lwp_yield(){
+    thread nextThread = currentScheduler->next();
+    if(nextThread == NULL){
+        //if no thread terminate the program
+        //call exit() with the termination status
+        //of calling thread
+        lwp_exit(TERMOFFSET);
+    }
+    else{
+        swap_rfiles(curRunningThread, nextThread);
+    }
+}
+
+scheduler lwp_set_scheduler(scheduler sched){
+    scheduler oldScheduler = currentScheduler;
+    currentScheduler = sched; 
+    if(sched->init != NULL){
+        sched->init();
+    }   
+
+
+    for(thread nxtThread = oldScheduler->next();
+        nxtThread != NULL; nxtThread = oldScheduler->next()){
+        
+        oldScheduler->remove(nxtThread);
+        sched->admit(nxtThread);
+    }
+
+    if(oldScheduler->shutdown != NULL){
+        oldScheduler->shutdown();
+    }
+}
+
+scheduler lwp_get_scheduler(){
+    return currentScheduler;
 }

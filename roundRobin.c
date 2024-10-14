@@ -75,6 +75,9 @@ void rrRemove(thread victim)
     thread prvThread;
     thread nxtThread;
 
+    if(head == NULL){
+        return;
+    }
     /*if the thread is the first victim*/
     if (victim == head)
     {

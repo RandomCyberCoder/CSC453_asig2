@@ -260,7 +260,7 @@ tid_t lwp_create(lwpfun fun, void *arg)
     /*initialize the stack*/
 
     getBaseLoc = (uintptr_t)newThread->stack;
-    getBaseLoc += howBig - ADDRESS_SIZE;
+    getBaseLoc += howBig - (ADDRESS_SIZE * 2);
 
     /*"Push" the address of lwp_wrap to the top of the
     stack so that when ret happens, it pops this address
@@ -268,13 +268,13 @@ tid_t lwp_create(lwpfun fun, void *arg)
     Also "Push" the sbp of the stack allocated by mmap
     so it returns to the appropriate stack frame ASK NICO*/
 
-    newThread->stack[howBig] = lwp_wrap;
-    newThread->stack[howBig - PREV] = getBaseLoc;
+    newThread->stack[howBig - PREV] = lwp_wrap;
+    newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
 
     /*Set rbp to the address of the top of the stack for
     wrap to use once it is returned to*/
 
-    newThread->state.rbp = (unsigned long)getBaseLoc;
+    newThread->state.rbp = (unsigned long)(getBaseLoc);
 
     /*Add thread to thread pool*/
 

@@ -8,6 +8,8 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <bits/mman.h>
+#include <errno.h>
+#include <stdio.h>
 
 #define STACK_SIZE 8388608
 #define MAP_ANONYMOUS 0x20
@@ -30,8 +32,10 @@ will run
 
 struct scheduler rr_publish = {NULL, NULL, rrAdmit, rrRemove, rrNext, rrqlen};
 scheduler currentScheduler = &rr_publish;
-
+thread curRunningThread = NULL;
+thread systemThread = NULL;
 unsigned long threadIdCounter = INIT;
+
 
 size_t create_stackSizeHelper()
 {
@@ -92,6 +96,16 @@ size_t create_stackSizeHelper()
     return howBig;
 }
 
+void lwp_wrap(lwpfun fun, void *arg)
+{
+    /* Call the given lwpfunction with the given argument.
+     * Calls lwp exit() with its return value
+     */
+    int rval;
+    rval = fun(arg);
+    lwp_exit(rval);
+}
+
 tid_t lwp_create(lwpfun fun, void *arg)
 {
     size_t howBig;
@@ -103,7 +117,7 @@ tid_t lwp_create(lwpfun fun, void *arg)
     /*create the threads context and stack*/
     /*calculate howBig the stack size will be*/
     howBig = create_stackSizeHelper();
-    newThread = malloc(sizeof(thread));
+    newThread = (thread)malloc(sizeof(thread));
 
     /*Check if malloc failed*/
     if (newThread == NULL)
@@ -132,6 +146,7 @@ tid_t lwp_create(lwpfun fun, void *arg)
     newThread->stacksize = howBig;
     newThread->state.rdi = (unsigned long)fun;
     newThread->state.rsi = (unsigned long)arg;
+    newThread->state.fxsave = FPU_INIT;
 
     /*initialize the stack*/
 
@@ -155,12 +170,39 @@ tid_t lwp_create(lwpfun fun, void *arg)
     currentScheduler->admit(newThread);
 }
 
-void lwp_wrap(lwpfun fun, void *arg)
-{
-    /* Call the given lwpfunction with the given argument.
-     * Calls lwp exit() with its return value
-     */
-    int rval;
-    rval = fun(arg);
-    lwp_exit(rval);
+void lwp_start(){
+    /*transform calling thread(the system thread)
+    into a LWP. Set up its context and admit() it
+    to the scheduler. Don't allocate stack!
+    IMPORTANT: DON'T DEALLOCATE THIS LWP!!!! */
+    systemThread = (thread)malloc(sizeof(thread));
+    if(systemThread == NULL){
+        errno = ENOMEM;
+        perror("lwp_start() malloc() for thread context failed");
+    }
+    //I think this next line is wrong because when we load it back
+    //it will try to run from this place and try to admit itself to the
+    //scheduler again. So what do we do.......
+    swap_rfiles(&(systemThread->state), NULL);
+    currentScheduler->admit(systemThread);
+    curRunningThread = currentScheduler->next();
+    swap_rfiles(NULL, &(curRunningThread->state));
+
+    //proposed solution
+    //admit the thread to the scheduler
+    //check what the next thread should be according to the scheduler
+    //if the next thread is the system thread we just created then
+    //there is not context to setup. the rfile is only needed to load
+    //a threads context who got suspended, but the system thread never did so
+    //we don't need to set up its context... I think
+    //IF the next thread to run is not the system thread then we can save it's
+    //context and because this is the last line of code in the function, the
+    //system thread will return back to the caller
+    currentScheduler->admit(systemThread);
+    curRunningThread = currentScheduler->next();
+    if(curRunningThread != systemThread){
+        swap_rfiles(&(systemThread->state), &(curRunningThread->state));
+    }
+    
+
 }

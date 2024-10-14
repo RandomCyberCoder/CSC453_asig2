@@ -416,7 +416,7 @@ tid_t lwp_wait(int *status)
 {
     thread currThread;
     tid_t tid;
-    int status;
+    int retStatus;
 
     /*Search for terminated threads in the terminated list*/
 
@@ -458,6 +458,44 @@ tid_t lwp_wait(int *status)
         /*If there are no more runnable threads return NO_THREAD*/
 
         if (currentScheduler->qlen() <= 1) {
+            /*Remove the thread from the pool*/
+
+            remove_thread_from_pool(currThread);
+
+            /*Populate status if non-null*/
+
+            if (status != NULL) {
+                *status = currThread->status;
+            }
+
+            /*Deallocate the threads resources*/
+
+            /*If the thread is the system thread, 
+            do nothing about a stack and return it's id
+            after freeing the thread context*/
+
+            if (currThread->stack == NULL) {
+                free(currThread);
+                return NO_THREAD;
+            }
+
+            /*Otherwise, unmap its memory region, free the 
+            thread context, and return the id*/
+
+            retStatus = munmap(currThread->stack, currThread->stacksize);
+
+            /*Check if munmap failed*/
+            if (retStatus == SYS_FAIL) {
+                perror("Failed to unmap region");
+            }
+            
+            free(currThread);
+            /*Shutdown the scheduler if needed*/
+
+            if(currentScheduler->shutdown != NULL) {
+                currentScheduler->shutdown();
+            }
+
             return NO_THREAD;
         }
 
@@ -474,6 +512,16 @@ tid_t lwp_wait(int *status)
 
     tid = currThread->tid;
 
+    /*Remove the thread from the pool*/
+
+    remove_thread_from_pool(currThread);
+
+    /*Populate status if non-null*/
+
+    if (status != NULL) {
+        *status = currThread->status;
+    }
+
     /*Deallocate the threads resources*/
 
     /*If the thread is the system thread, 
@@ -488,10 +536,10 @@ tid_t lwp_wait(int *status)
     /*Otherwise, unmap its memory region, free the 
     thread context, and return the id*/
 
-    status = munmap(currThread->stack, currThread->stacksize);
+    retStatus = munmap(currThread->stack, currThread->stacksize);
 
     /*Check if munmap failed*/
-    if (status == SYS_FAIL) {
+    if (retStatus == SYS_FAIL) {
         perror("Failed to unmap region");
     }
     
@@ -512,7 +560,7 @@ thread tid2thread(tid_t tid){
     }
 }
 
-tid_t lwp_gettid(){
+tid_t lwp_gettid(void){
     return callingThread->tid;
 }
 

@@ -34,6 +34,8 @@ scheduler currentScheduler = &rr_publish;
 /*for global linked list of threads*/
 
 thread threadPool = NULL;
+thread waiting = NULL;
+thread terminated = NULL;
 thread callingThread; /*ASK NICO, will this even work? Seems iffy but how do we
                         know what the calling thread is, or if we're calling
                         functions from outside a thread*/
@@ -283,6 +285,8 @@ tid_t lwp_create(lwpfun fun, void *arg)
     /*Admit the new thread to the scheduler*/
 
     currentScheduler->admit(newThread);
+
+    return newThread->tid;
 }
 
 void lwp_start(void)
@@ -348,6 +352,7 @@ void lwp_yield(void)
 
 void lwp_exit(int exitval)
 {
+    thread currThread;
     /*Terminate the calling thread*/
     /*Not entirely sure if this counts as terminating it or
     if there's more to do. ASK NICO*/
@@ -359,6 +364,49 @@ void lwp_exit(int exitval)
 
     callingThread->status = MKTERMSTAT(callingThread->status, exitval);
 
+    /*Remove the thread from the scheduler*/
+
+    currentScheduler->remove(callingThread);
+
+    /*Add it to the terminated list*/
+
+    /*If there are no threads terminated, make it the head*/
+
+    if (terminated == NULL) {
+        terminated = callingThread;
+    } else {
+        /*Search for the end of the terminated list*/
+
+        currThread = terminated;
+        while (currThread->exited != NULL) {
+            currThread = currThread->exited;
+        }
+
+        /*And add the calling thread to the end*/
+
+        currThread->exited = callingThread;
+    }
+
+    /*Set next pointer at end of list to NULL*/
+
+    callingThread->exited = NULL;
+
+    /*Check if there's any waiting threads*/
+
+    currThread = waiting;
+
+    /*If there is a thread waiting, reschedule it*/
+
+    if (currThread != NULL) {
+        /*Remove it from the queue*/
+
+        waiting = waiting->exited;
+
+        /*Reschedule the waiting thread*/
+
+        currentScheduler->admit(currThread);
+    }
+
     /*Yield control to next thread*/
 
     lwp_yield();
@@ -366,41 +414,89 @@ void lwp_exit(int exitval)
 
 tid_t lwp_wait(int *status)
 {
-    thread currentThread;
-    int waitingCounter, threadCounter;
+    thread currThread;
+    tid_t tid;
+    int status;
 
-    /*Search for terminated threads in the threadPool*/
-    currentThread = threadPool;
+    /*Search for terminated threads in the terminated list*/
 
-    /*If there are no threads, return NO_THREAD*/
+    currThread = terminated;
 
-    if (currentThread == NULL)
+    /*If there are no terminated threads, add this 
+    thread to the waiting thread list*/
+
+    if (currThread == NULL)
     {
-        return NO_THREAD;
-    }
+        /*Deschedule the calling thread first*/
 
-    waitingCounter, threadCounter = 0;
-    while (!LWPTERMINATED(currentThread->status))
-    {
-        currentThread = threadPool->lib_one;
+        currentScheduler->remove(callingThread);
 
-        /*If we've reached the end of the pool, block
-        aka go back to the front and start again*/
+        /*Add to waiting thread list*/
 
-        if (currentThread == NULL)
-        {
-            currentThread = threadPool;
+        currThread = waiting;
+
+        if (currThread == NULL) {
+            /*If waiting list is empty, set head to caller*/
+
+            waiting = callingThread;
+        } else {
+            /*Search for end of waiting thread list*/
+
+            while (currThread->exited != NULL) {
+                currThread = currThread->exited;
+            }
+
+            /*And add the calling thread to the end*/
+
+            currThread->exited = callingThread;
         }
+
+        /*Set next pointer of end of list to NULL*/
+
+        callingThread->exited = NULL;
+
+        /*If there are no more runnable threads return NO_THREAD*/
+
+        if (currentScheduler->qlen() <= 1) {
+            return NO_THREAD;
+        }
+
+        /*Otherwise "block" by yielding*/
+
+        lwp_yield();
+
+        /*Get the oldest terminated thread now that we're back*/
+
+        currThread = terminated;
     }
 
-    /*Not entirely sure the right direction to go
-    with the rest of this one. There's no good way
-    for us to see which threads are waiting currently.
-    We can either create a global linked list for waiting
-    processes, and then maybe another for terminated ones,
-    or get rid of the global thread pool that uses both the
-    library pointers in the thread contexts and use them for
-    waiting or terminated threads. ASK NICO*/
+    /*Get the id of the thread*/
+
+    tid = currThread->tid;
+
+    /*Deallocate the threads resources*/
+
+    /*If the thread is the system thread, 
+    do nothing about a stack and return it's id
+    after freeing the thread context*/
+
+    if (currThread->stack == NULL) {
+        free(currThread);
+        return tid;
+    }
+
+    /*Otherwise, unmap its memory region, free the 
+    thread context, and return the id*/
+
+    status = munmap(currThread->stack, currThread->stacksize);
+
+    /*Check if munmap failed*/
+    if (status == SYS_FAIL) {
+        perror("Failed to unmap region");
+    }
+    
+    free(currThread);
+    return tid;
 }
 
 scheduler lwp_set_scheduler(scheduler sched){

@@ -262,7 +262,7 @@ tid_t lwp_create(lwpfun fun, void *arg)
     /*initialize the stack*/
 
     getBaseLoc = (uintptr_t)newThread->stack;
-    getBaseLoc += howBig - ADDRESS_SIZE;
+    getBaseLoc += howBig - (ADDRESS_SIZE * 2);
 
     /*"Push" the address of lwp_wrap to the top of the
     stack so that when ret happens, it pops this address
@@ -270,13 +270,13 @@ tid_t lwp_create(lwpfun fun, void *arg)
     Also "Push" the sbp of the stack allocated by mmap
     so it returns to the appropriate stack frame ASK NICO*/
 
-    newThread->stack[howBig] = lwp_wrap;
-    newThread->stack[howBig - PREV] = getBaseLoc;
+    newThread->stack[howBig - PREV] = lwp_wrap;
+    newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
 
     /*Set rbp to the address of the top of the stack for
     wrap to use once it is returned to*/
 
-    newThread->state.rbp = (unsigned long)getBaseLoc;
+    newThread->state.rbp = (unsigned long)(getBaseLoc);
 
     /*Add thread to thread pool*/
 
@@ -499,11 +499,35 @@ tid_t lwp_wait(int *status)
     return tid;
 }
 
-scheduler lwp_set_scheduler(scheduler sched){
-    scheduler oldScheduler = currentScheduler;
-    currentScheduler = sched; 
-    if(sched->init != NULL){
-        sched->init();
+thread tid2thread(tid_t tid){
+    thread checkThread = threadPool;
+
+    while(checkThread != NULL){
+        if(tid == checkThread->tid){
+            return checkThread;
+        }
+        else{
+            checkThread = checkThread->lib_one;
+        }
+    }
+}
+
+tid_t lwp_gettid(){
+    return callingThread->tid;
+}
+
+
+scheduler lwp_set_scheduler(scheduler fun){
+    scheduler oldScheduler;
+
+    if(fun == NULL){
+        return currentScheduler;
+    }
+
+    oldScheduler = currentScheduler;
+    currentScheduler = fun; 
+    if(fun->init != NULL){
+        fun->init();
     }   
 
 
@@ -511,12 +535,14 @@ scheduler lwp_set_scheduler(scheduler sched){
         nxtThread != NULL; nxtThread = oldScheduler->next()){
         
         oldScheduler->remove(nxtThread);
-        sched->admit(nxtThread);
+        fun->admit(nxtThread);
     }
 
     if(oldScheduler->shutdown != NULL){
         oldScheduler->shutdown();
     }
+    
+    return currentScheduler;
 }
 
 scheduler lwp_get_scheduler(){

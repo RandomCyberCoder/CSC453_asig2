@@ -36,9 +36,7 @@ scheduler currentScheduler = &rr_publish;
 thread threadPool = NULL;
 thread waiting = NULL;
 thread terminated = NULL;
-thread callingThread; /*ASK NICO, will this even work? Seems iffy but how do we
-                        know what the calling thread is, or if we're calling
-                        functions from outside a thread*/
+thread callingThread = NULL;
 
 /*Create id counter*/
 
@@ -145,27 +143,12 @@ int remove_thread_from_pool(thread victim)
     return -1 if it doesn't exist*/
     thread currThread;
 
-    if (threadPool == NULL)
-    {
-        return SYS_FAIL;
-    }
+    currThread = threadPool;
 
     /*If the only thread in the pool is the victim, set pool to NULL*/
 
-    //ED note I don't think this implies that the victim thread is the only
-    //...thread, only that it is the first thread in the pool
-    if (threadPool == victim)
+    if (threadPool == victim && threadPool->lib_one == NULL)
     {
-        /*
-        if(threadPool->lib_one == NULL){
-            threadPool = NULL
-            reutrn EXIT_SUCCESS
-        }
-        else{
-            threadPool = threadPool->lib_one;
-            threadPool->lib_two = NULL;
-        }
-        */
         threadPool = NULL;
         return EXIT_SUCCESS;
     }
@@ -342,6 +325,12 @@ void lwp_yield(void)
 
     if (nextThread == NULL)
     {
+        /*Shutdown the scheduler if necessary*/
+
+        if (currentScheduler->shutdown != NULL) 
+        {
+            currentScheduler->shutdown;
+        }
         exit(callingThread->status);
     }
 
@@ -372,13 +361,15 @@ void lwp_exit(int exitval)
 
     /*If there are no threads terminated, make it the head*/
 
-    if (terminated == NULL) {
+    if (terminated == NULL)
+    {
         terminated = callingThread;
     } else {
         /*Search for the end of the terminated list*/
 
         currThread = terminated;
-        while (currThread->exited != NULL) {
+        while (currThread->exited != NULL)
+        {
             currThread = currThread->exited;
         }
 
@@ -397,7 +388,8 @@ void lwp_exit(int exitval)
 
     /*If there is a thread waiting, reschedule it*/
 
-    if (currThread != NULL) {
+    if (currThread != NULL)
+    {
         /*Remove it from the queue*/
 
         waiting = waiting->exited;
@@ -435,14 +427,16 @@ tid_t lwp_wait(int *status)
 
         currThread = waiting;
 
-        if (currThread == NULL) {
+        if (currThread == NULL)
+        {
             /*If waiting list is empty, set head to caller*/
 
             waiting = callingThread;
         } else {
             /*Search for end of waiting thread list*/
 
-            while (currThread->exited != NULL) {
+            while (currThread->exited != NULL)
+            {
                 currThread = currThread->exited;
             }
 
@@ -457,14 +451,16 @@ tid_t lwp_wait(int *status)
 
         /*If there are no more runnable threads return NO_THREAD*/
 
-        if (currentScheduler->qlen() <= 1) {
+        if (currentScheduler->qlen() <= 1)
+        {
             /*Remove the thread from the pool*/
 
             remove_thread_from_pool(currThread);
 
             /*Populate status if non-null*/
 
-            if (status != NULL) {
+            if (status != NULL)
+            {
                 *status = currThread->status;
             }
 
@@ -474,7 +470,8 @@ tid_t lwp_wait(int *status)
             do nothing about a stack and return it's id
             after freeing the thread context*/
 
-            if (currThread->stack == NULL) {
+            if (currThread->stack == NULL)
+            {
                 free(currThread);
                 return NO_THREAD;
             }
@@ -485,14 +482,16 @@ tid_t lwp_wait(int *status)
             retStatus = munmap(currThread->stack, currThread->stacksize);
 
             /*Check if munmap failed*/
-            if (retStatus == SYS_FAIL) {
+            if (retStatus == SYS_FAIL)
+            {
                 perror("Failed to unmap region");
             }
             
             free(currThread);
             /*Shutdown the scheduler if needed*/
 
-            if(currentScheduler->shutdown != NULL) {
+            if(currentScheduler->shutdown != NULL)
+            {
                 currentScheduler->shutdown();
             }
 
@@ -518,7 +517,8 @@ tid_t lwp_wait(int *status)
 
     /*Populate status if non-null*/
 
-    if (status != NULL) {
+    if (status != NULL)
+    {
         *status = currThread->status;
     }
 
@@ -528,7 +528,8 @@ tid_t lwp_wait(int *status)
     do nothing about a stack and return it's id
     after freeing the thread context*/
 
-    if (currThread->stack == NULL) {
+    if (currThread->stack == NULL)
+    {
         free(currThread);
         return tid;
     }
@@ -539,7 +540,8 @@ tid_t lwp_wait(int *status)
     retStatus = munmap(currThread->stack, currThread->stacksize);
 
     /*Check if munmap failed*/
-    if (retStatus == SYS_FAIL) {
+    if (retStatus == SYS_FAIL)
+    {
         perror("Failed to unmap region");
     }
     

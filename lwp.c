@@ -288,10 +288,10 @@ void lwp_start(void)
         perror("lwp_start() malloc() for thread context failed");
     }
 
-    /*Initialize context. Stack attribtues are NULL
+    /*Initialize context. Stack attributes are NULL
     to indicate this is the original system thread
     Register values of context don't matter because they will
-    be saved to the corret values when yield is called*/
+    be saved to the correct values when yield is called*/
 
     systemThread->tid = threadIdCounter++;
     systemThread->stack = NULL;
@@ -623,20 +623,27 @@ tid_t lwp_gettid(void)
 }
 
 
-scheduler lwp_set_scheduler(scheduler fun)
+void lwp_set_scheduler(scheduler fun)
 {
     scheduler oldScheduler;
 
-    if(fun == NULL)
+    if(fun == NULL & currentScheduler == &rr_publish)
     {
-        return currentScheduler;
+        return;
+    }
+    else if(fun == NULL & currentScheduler != &rr_publish){
+        oldScheduler = currentScheduler;
+        currentScheduler = &rr_publish;
+    }
+    else{
+        oldScheduler = currentScheduler;
+        currentScheduler = fun; 
     }
 
-    oldScheduler = currentScheduler;
-    currentScheduler = fun; 
-    if(fun->init != NULL)
+
+    if(currentScheduler->init != NULL)
     {
-        fun->init();
+        currentScheduler->init();
     }   
 
 
@@ -645,7 +652,7 @@ scheduler lwp_set_scheduler(scheduler fun)
     {
         
         oldScheduler->remove(nxtThread);
-        fun->admit(nxtThread);
+        currentScheduler->admit(nxtThread);
     }
 
     if(oldScheduler->shutdown != NULL)
@@ -653,7 +660,6 @@ scheduler lwp_set_scheduler(scheduler fun)
         oldScheduler->shutdown();
     }
     
-    return currentScheduler;
 }
 
 scheduler lwp_get_scheduler()

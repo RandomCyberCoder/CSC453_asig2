@@ -342,7 +342,14 @@ void lwp_yield(void)
 
         /*Remove calling thread from pool*/
 
-        remove_thread_from_pool(callingThread);
+        retStatus = remove_thread_from_pool(callingThread);
+
+        /*Check if successful*/
+
+        if (retStatus == SYS_FAIL)
+        {
+            perror("Failed to remove thread from pool");
+        }
 
         /*Deallocate the threads resources*/
 
@@ -498,7 +505,14 @@ tid_t lwp_wait(int *status)
         {
             /*Remove the thread from the pool*/
 
-            remove_thread_from_pool(currThread);
+            retStatus = remove_thread_from_pool(currThread);
+
+            /*Check if successful*/
+
+            if (retStatus == SYS_FAIL)
+            {
+                perror("Failed to remove thread from pool");
+            }
 
             /*Populate status if non-null*/
 
@@ -556,7 +570,14 @@ tid_t lwp_wait(int *status)
 
     /*Remove the thread from the pool*/
 
-    remove_thread_from_pool(currThread);
+    retStatus = remove_thread_from_pool(currThread);
+
+    /*Check if successful*/
+
+    if (retStatus == SYS_FAIL)
+    {
+        perror("Failed to remove thread from pool");
+    }
 
     /*Update the terminated list*/
 
@@ -611,6 +632,10 @@ thread tid2thread(tid_t tid)
             checkThread = checkThread->lib_one;
         }
     }
+
+    /*If the thread wasn't found return NULL*/
+
+    return NULL;
 }
 
 tid_t lwp_gettid(void)
@@ -627,11 +652,11 @@ void lwp_set_scheduler(scheduler fun)
 {
     scheduler oldScheduler;
 
-    if(fun == NULL & currentScheduler == &rr_publish)
+    if(fun == NULL && currentScheduler == &rr_publish)
     {
         return;
     }
-    else if(fun == NULL & currentScheduler != &rr_publish){
+    else if(fun == NULL && currentScheduler != &rr_publish){
         oldScheduler = currentScheduler;
         currentScheduler = &rr_publish;
     }

@@ -81,6 +81,14 @@ void rrRemove(thread victim)
     while (curThread != victim)
     {
         curThread = curThread->sched_one;
+
+        /*If you don't find the victim and reach 
+        the end of the list just return*/
+
+        if (curThread == NULL)
+        {
+            return;
+        }
     }
     /*once the victim thread has been found, remove it from the scheduler.
     and have the thread before it an after it point to one another.
@@ -90,7 +98,7 @@ void rrRemove(thread victim)
     prvThread->sched_one = nxtThread;
     if (nxtThread != NULL)
     {
-        /*if the thread removed was no the last one in the list*/
+        /*if the thread removed was not the last one in the list*/
         nxtThread->sched_two = prvThread;
     }
     else
@@ -113,7 +121,7 @@ thread rrNext()
     thread newHeadThread;
 
     if (qLen == 0){
-        /*if there are no thread return 0*/
+        /*if there are no threads return NULL*/
         return NULL;
     }
     else if (qLen == 1)

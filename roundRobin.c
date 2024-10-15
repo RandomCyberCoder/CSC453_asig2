@@ -19,21 +19,6 @@ thread head = NULL;
 thread tail = NULL;
 unsigned long qLen = 0;
 
-void rrInit()
-{
-    // do we want to do anything here?? Can't see why we would.
-}
-
-void rrShutdown()
-{
-    // do we want to do anything here?????
-    /*
-    we don't use any dynamic memory so maybe not.... if another scheduler
-    is given could this be useful?? I don't think we wan't any of that logic
-    here though.
-    */
-}
-
 void rrAdmit(thread new)
 {
     if (head == NULL)
@@ -127,10 +112,17 @@ thread rrNext()
     thread oldTailThread;
     thread newHeadThread;
 
-    if (qLen == 1)
+    if (qLen == 0){
+        /*if there are no thread return 0*/
+        return NULL;
+    }
+    else if (qLen == 1)
     {
         /*if there is only one thread available*/
-        return head;
+        nextThread = head;
+        head = NULL;
+        tail = NULL;
+        qLen -= 1;
     }
     else
     {

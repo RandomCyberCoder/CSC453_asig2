@@ -384,8 +384,9 @@ void lwp_yield(void)
         exit(status);
     }
 
-    /*Otherwise, swap contexts*/
+    /*Otherwise, set callingThread and swap contexts*/
 
+    callingThread = nextThread;
     swap_rfiles(&(callingThread->state), &(nextThread->state));
 }
 

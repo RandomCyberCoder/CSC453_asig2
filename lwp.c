@@ -253,8 +253,8 @@ tid_t lwp_create(lwpfun fun, void *arg)
     Also "Push" the sbp of the stack allocated by mmap
     so it returns to the appropriate stack frame ASK NICO*/
 
-    newThread->stack[howBig - PREV] = lwp_wrap;
-    newThread->stack[howBig - (PREV * 2)] = (unsigned long)getBaseLoc;
+    newThread->stack[howBig - PREV] = (unsigned long)lwp_wrap;
+    newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
 
     /*Set rbp to the address of the rbp reg on our stack
     so that when it is popped inside leave and ret, it pops

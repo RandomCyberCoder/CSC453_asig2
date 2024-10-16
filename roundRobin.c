@@ -70,8 +70,8 @@ void rrRemove(thread victim)
         qLen -= 1;
         if (qLen == 0)
         {
-            head == NULL;
-            tail == NULL;
+            head = NULL;
+            tail = NULL;
         }
         return;
     }

@@ -34,6 +34,9 @@ roundRobin.o: roundRobin.h roundRobin.c
 magic64.o: magic64.S
 	$(CC) -o magic64.o -c magic64.S
 
+rmcore:
+	rm -f core*
+
 test: prog.o
 	
 prog.o: prog.c

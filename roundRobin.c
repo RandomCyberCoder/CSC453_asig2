@@ -56,19 +56,7 @@ void rrAdmit(thread new)
         qLen += 1;
     }
 
-    /*fprintf(stderr, "Admitted thread %p\n",
-            (unsigned long *)new);*/
-
-    curr = head;
-    /*fprintf(stderr, "In Admitted: Head %p\n",
-            (unsigned long *)curr);*/
-    curr = curr->sched_one;
-    while (curr != NULL)
-    {
-        /*fprintf(stderr, "Next %p\n",
-                (unsigned long *)curr);*/
-        curr = curr->sched_one;
-    }
+    
 }
 
 void rrRemove(thread victim)
@@ -190,16 +178,7 @@ thread rrNext()
         head = newHeadThread;
     }
 
-    curr = head;
-    /*fprintf(stderr, "New Head %p\n",
-            (unsigned long *)curr);*/
-    curr = curr->sched_one;
-    while (curr != NULL)
-    {
-        /*fprintf(stderr, "Next %p\n",
-                (unsigned long *)curr);*/
-        curr = curr->sched_one;
-    }
+    
 
     return nextThread;
 }

@@ -20,7 +20,19 @@ OBJS	= $(SNAKEOBJS) $(HUNGRYOBJS) $(NUMOBJS)
 
 EXTRACLEAN = core $(PROGS)
 
-.PHONY: all allclean clean rs hs ns
+.PHONY: all allclean clean rs hs ns liblwp.so lwp.o roundRobin.o magic64.o
+
+liblwp.so: lwp.c lwp.h magic64.o roundRobin.o
+	$(LD) -shared -fPIC -o liblwp.so lwp.o roundRobin.o magic64.o
+
+lwp.o: lwp.c lwp.h
+	$(LD) -Wall -g -fPIC -o lwp.o -c lwp
+
+roundRobin.o: roundRobin.h roundRobin.c
+	$(LD) -Wall -g -fPIC -o roundRobin.o roundRobin.c
+
+magic64.o: magic64.S
+	$(LD) -o magic64.o -c magic64.S
 
 all: 	$(PROGS)
 

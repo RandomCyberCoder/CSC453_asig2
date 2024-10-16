@@ -46,8 +46,8 @@ Testing (failure details below):
         -----
          1) Linking (only) against required routines      ... ok.
          2) Create a thread, but don't run it.            ... FAILURE.
-         3) start(). System thread only. Calls exit(3);   ... ok.
-         4) start(). System thread only. Calls lwp_exit() ... ok.
+         3) start(). System thread only. Calls exit(3);   ... FAILURE.
+         4) start(). System thread only. Calls lwp_exit() ... FAILURE.
          5) Check stack frame alignment                   ... FAILURE.
          6) One lwp, calling lwp_yield(), then exit()     ... FAILURE.
          7) One created lwp which calls exit(3), main() l ... FAILURE.
@@ -70,60 +70,36 @@ Testing (failure details below):
         24) Transfer threads between schedulers check for ... FAILURE.
         25) Check that Returned TIDs are unique           ... FAILURE.
         26) Does tid2thread return the right thread?      ... FAILURE.
-        27) Tid2thread() returns NULL given a bad tid?    ... ok.
+        27) Tid2thread() returns NULL given a bad tid?    ... FAILURE.
         28) Is thread library using sched_one? sched_two? ... FAILURE.
         -----
-FAILURE. (4/28 passed)
+FAILURE. (1/28 passed)
 
 
 ----------------------------
-46 Corefile(s) Present:
-    core.3162
-    core.3258
-    core.3329
-    core.3362
-    core.3404
-    core.3448
-    core.3479
-    core.3513
-    core.3545
-    core.3577
-    core.3609
-    core.3640
-    core.3676
-    core.3708
-    core.3741
-    core.3773
-    core.3809
-    core.3847
-    core.3879
-    core.3911
-    core.3943
-    core.3975
-    core.4036
-    core.6709
-    core.6797
-    core.6861
-    core.6893
-    core.6925
-    core.6957
-    core.6989
-    core.7033
-    core.7065
-    core.7097
-    core.7129
-    core.7162
-    core.7194
-    core.7226
-    core.7258
-    core.7290
-    core.7322
-    core.7354
-    core.7386
-    core.7424
-    core.7456
-    core.7494
-    core.7559
+22 Corefile(s) Present:
+    core.16336
+    core.16419
+    core.16451
+    core.16520
+    core.16553
+    core.16585
+    core.16617
+    core.16649
+    core.16686
+    core.16725
+    core.16764
+    core.16797
+    core.16831
+    core.16863
+    core.16897
+    core.16930
+    core.16962
+    core.16994
+    core.17026
+    core.17058
+    core.17090
+    core.17154
 ----------------------------
 
 
@@ -140,16 +116,109 @@ Well, we didn't crash
 ----------
 Submitted:
 ----------
-Child process (6709) exited due to signal (Segmentation fault).
+Stack base at 0x7f2e72183000
+Top of stack 0x7f2e72983070
+Stack loc for regs 0x7f2e72983060
+loc attempting to write to for ra 0x7f2e72983060
+Add of wrap 0x7f2e72d532ce
+RA loc 0x7f2e72983068
+Add at ra loc 0x7f2e72d532ce
+rbp loc 0x7f2e72983060
+Add at rbp loc 0x7f2e72983070
+rbp to become rsp 0x7f2e72983060
+Admitted thread 0x1334010
+In Admitted: Head 0x1334010
+Well, we didn't crash
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1c1
-< Well, we didn't crash
----
-> Child process (6709) exited due to signal (Segmentation fault).
+0a1,12
+> Stack base at 0x7f2e72183000
+> Top of stack 0x7f2e72983070
+> Stack loc for regs 0x7f2e72983060
+> loc attempting to write to for ra 0x7f2e72983060
+> Add of wrap 0x7f2e72d532ce
+> RA loc 0x7f2e72983068
+> Add at ra loc 0x7f2e72d532ce
+> rbp loc 0x7f2e72983060
+> Add at rbp loc 0x7f2e72983070
+> rbp to become rsp 0x7f2e72983060
+> Admitted thread 0x1334010
+> In Admitted: Head 0x1334010
+---------
+=================================================
+TEST 3: start().  System thread only.  Calls exit(3);
+
+This will cause the system thread to be turned into an LWP
+then bail.
+
+
+----------
+Reference:
+----------
+About to call lwp_start() with no threads...ok.
+----------
+Submitted:
+----------
+Admitted thread 0x8dd010
+In Admitted: Head 0x8dd010
+In Next: Head 0x8dd010
+Add of next thread 0x8dd010
+Calling Thread 0x8dd010
+Next Thread 0x8dd010
+About to call lwp_start() with no threads...ok.
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+0a1,6
+> Admitted thread 0x8dd010
+> In Admitted: Head 0x8dd010
+> In Next: Head 0x8dd010
+> Add of next thread 0x8dd010
+> Calling Thread 0x8dd010
+> Next Thread 0x8dd010
+---------
+=================================================
+TEST 4: start().  System thread only.  Calls lwp_exit();
+
+This will cause the system thread to be turned into an LWP
+then bail.
+
+
+----------
+Reference:
+----------
+About to call lwp_start() with no threads...ok.
+----------
+Submitted:
+----------
+Admitted thread 0x899010
+In Admitted: Head 0x899010
+In Next: Head 0x899010
+Add of next thread 0x899010
+Calling Thread 0x899010
+Next Thread 0x899010
+Removing 0x899010
+Add of next thread (nil)
+About to call lwp_start() with no threads...ok.
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+0a1,8
+> Admitted thread 0x899010
+> In Admitted: Head 0x899010
+> In Next: Head 0x899010
+> Add of next thread 0x899010
+> Calling Thread 0x899010
+> Next Thread 0x899010
+> Removing 0x899010
+> Add of next thread (nil)
 ---------
 =================================================
 TEST 5: Check stack frame alignment
@@ -161,16 +230,60 @@ Stack frame alignment appears correct.
 ----------
 Submitted:
 ----------
-Child process (6797) exited due to signal (Segmentation fault).
+Stack base at 0x7f534f9ad000
+Top of stack 0x7f53501ad070
+Stack loc for regs 0x7f53501ad060
+loc attempting to write to for ra 0x7f53501ad060
+Add of wrap 0x7f535057d2ce
+RA loc 0x7f53501ad068
+Add at ra loc 0x7f535057d2ce
+rbp loc 0x7f53501ad060
+Add at rbp loc 0x7f53501ad070
+rbp to become rsp 0x7f53501ad060
+Admitted thread 0xfad010
+In Admitted: Head 0xfad010
+Admitted thread 0xfad030
+In Admitted: Head 0xfad010
+Next 0xfad030
+In Next: Head 0xfad010
+Next 0xfad030
+New Head 0xfad030
+Next 0xfad010
+Add of next thread 0xfad010
+Calling Thread 0xfad030
+Next Thread 0xfad010
+Child process (16336) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1c1
+1c1,23
 < Stack frame alignment appears correct.
 ---
-> Child process (6797) exited due to signal (Segmentation fault).
+> Stack base at 0x7f534f9ad000
+> Top of stack 0x7f53501ad070
+> Stack loc for regs 0x7f53501ad060
+> loc attempting to write to for ra 0x7f53501ad060
+> Add of wrap 0x7f535057d2ce
+> RA loc 0x7f53501ad068
+> Add at ra loc 0x7f535057d2ce
+> rbp loc 0x7f53501ad060
+> Add at rbp loc 0x7f53501ad070
+> rbp to become rsp 0x7f53501ad060
+> Admitted thread 0xfad010
+> In Admitted: Head 0xfad010
+> Admitted thread 0xfad030
+> In Admitted: Head 0xfad010
+> Next 0xfad030
+> In Next: Head 0xfad010
+> Next 0xfad030
+> New Head 0xfad030
+> Next 0xfad010
+> Add of next thread 0xfad010
+> Calling Thread 0xfad030
+> Next Thread 0xfad010
+> Child process (16336) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 6: One lwp, calling lwp_yield(), then exit()
@@ -186,14 +299,34 @@ I'm still alive.  Goodbye
 ----------
 Submitted:
 ----------
+Admitted thread 0x1425010
+In Admitted: Head 0x1425010
+In Next: Head 0x1425010
+Add of next thread 0x1425010
+Calling Thread 0x1425010
+Next Thread 0x1425010
+In Next: Head 0x1425010
+Add of next thread 0x1425010
+Calling Thread 0x1425010
+Next Thread 0x1425010
 Greetings from the original thread.  Yielding...
+I'm still alive.  Goodbye
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-2d1
-< I'm still alive.  Goodbye
+0a1,10
+> Admitted thread 0x1425010
+> In Admitted: Head 0x1425010
+> In Next: Head 0x1425010
+> Add of next thread 0x1425010
+> Calling Thread 0x1425010
+> Next Thread 0x1425010
+> In Next: Head 0x1425010
+> Add of next thread 0x1425010
+> Calling Thread 0x1425010
+> Next Thread 0x1425010
 ---------
 =================================================
 TEST 7: One created lwp which calls exit(3), main() lwp_wait()s
@@ -208,16 +341,60 @@ Greetings from Thread 3.  Goodbye
 ----------
 Submitted:
 ----------
-Child process (6861) exited due to signal (Segmentation fault).
+Stack base at 0x7f931f9cf000
+Top of stack 0x7f93201cf070
+Stack loc for regs 0x7f93201cf060
+loc attempting to write to for ra 0x7f93201cf060
+Add of wrap 0x7f932059f2ce
+RA loc 0x7f93201cf068
+Add at ra loc 0x7f932059f2ce
+rbp loc 0x7f93201cf060
+Add at rbp loc 0x7f93201cf070
+rbp to become rsp 0x7f93201cf060
+Admitted thread 0x1b09010
+In Admitted: Head 0x1b09010
+Admitted thread 0x1b09030
+In Admitted: Head 0x1b09010
+Next 0x1b09030
+In Next: Head 0x1b09010
+Next 0x1b09030
+New Head 0x1b09030
+Next 0x1b09010
+Add of next thread 0x1b09010
+Calling Thread 0x1b09030
+Next Thread 0x1b09010
+Child process (16419) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1c1
+1c1,23
 < Greetings from Thread 3.  Goodbye
 ---
-> Child process (6861) exited due to signal (Segmentation fault).
+> Stack base at 0x7f931f9cf000
+> Top of stack 0x7f93201cf070
+> Stack loc for regs 0x7f93201cf060
+> loc attempting to write to for ra 0x7f93201cf060
+> Add of wrap 0x7f932059f2ce
+> RA loc 0x7f93201cf068
+> Add at ra loc 0x7f932059f2ce
+> rbp loc 0x7f93201cf060
+> Add at rbp loc 0x7f93201cf070
+> rbp to become rsp 0x7f93201cf060
+> Admitted thread 0x1b09010
+> In Admitted: Head 0x1b09010
+> Admitted thread 0x1b09030
+> In Admitted: Head 0x1b09010
+> Next 0x1b09030
+> In Next: Head 0x1b09010
+> Next 0x1b09030
+> New Head 0x1b09030
+> Next 0x1b09010
+> Add of next thread 0x1b09010
+> Calling Thread 0x1b09030
+> Next Thread 0x1b09010
+> Child process (16419) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 8: Five lwps, calling lwp_yield(), then exit()
@@ -241,13 +418,78 @@ I (4) am still alive.  Goodbye.
 ----------
 Submitted:
 ----------
-Child process (6893) exited due to signal (Segmentation fault).
+Stack base at 0x7f3214ff5000
+Top of stack 0x7f32157f5070
+Stack loc for regs 0x7f32157f5060
+loc attempting to write to for ra 0x7f32157f5060
+Add of wrap 0x7f3215bc52ce
+RA loc 0x7f32157f5068
+Add at ra loc 0x7f3215bc52ce
+rbp loc 0x7f32157f5060
+Add at rbp loc 0x7f32157f5070
+rbp to become rsp 0x7f32157f5060
+Admitted thread 0x20bd010
+In Admitted: Head 0x20bd010
+Stack base at 0x7f32147f4000
+Top of stack 0x7f3214ff4070
+Stack loc for regs 0x7f3214ff4060
+loc attempting to write to for ra 0x7f3214ff4060
+Add of wrap 0x7f3215bc52ce
+RA loc 0x7f3214ff4068
+Add at ra loc 0x7f3215bc52ce
+rbp loc 0x7f3214ff4060
+Add at rbp loc 0x7f3214ff4070
+rbp to become rsp 0x7f3214ff4060
+Admitted thread 0x20bd030
+In Admitted: Head 0x20bd010
+Next 0x20bd030
+Stack base at 0x7f3213ff3000
+Top of stack 0x7f32147f3070
+Stack loc for regs 0x7f32147f3060
+loc attempting to write to for ra 0x7f32147f3060
+Add of wrap 0x7f3215bc52ce
+RA loc 0x7f32147f3068
+Add at ra loc 0x7f3215bc52ce
+rbp loc 0x7f32147f3060
+Add at rbp loc 0x7f32147f3070
+rbp to become rsp 0x7f32147f3060
+Admitted thread 0x20bd050
+In Admitted: Head 0x20bd010
+Stack base at 0x7f32137f2000
+Top of stack 0x7f3213ff2070
+Stack loc for regs 0x7f3213ff2060
+loc attempting to write to for ra 0x7f3213ff2060
+Add of wrap 0x7f3215bc52ce
+RA loc 0x7f3213ff2068
+Add at ra loc 0x7f3215bc52ce
+rbp loc 0x7f3213ff2060
+Add at rbp loc 0x7f3213ff2070
+rbp to become rsp 0x7f3213ff2060
+Admitted thread 0x20bd070
+In Admitted: Head 0x20bd010
+Stack base at 0x7f3212ff1000
+Top of stack 0x7f32137f1070
+Stack loc for regs 0x7f32137f1060
+loc attempting to write to for ra 0x7f32137f1060
+Add of wrap 0x7f3215bc52ce
+RA loc 0x7f32137f1068
+Add at ra loc 0x7f3215bc52ce
+rbp loc 0x7f32137f1060
+Add at rbp loc 0x7f32137f1070
+rbp to become rsp 0x7f32137f1060
+Admitted thread 0x20bd090
+In Admitted: Head 0x20bd010
+Admitted thread 0x20bd0b0
+In Admitted: Head 0x20bd010
+In Next: Head 0x20bd010
+New Head (nil)
+Child process (16451) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,10c1
+1,10c1,66
 < Greetings from Thread 0.  Yielding...
 < Greetings from Thread 1.  Yielding...
 < Greetings from Thread 2.  Yielding...
@@ -259,7 +501,72 @@ Differences (< reference > output)
 < I (3) am still alive.  Goodbye.
 < I (4) am still alive.  Goodbye.
 ---
-> Child process (6893) exited due to signal (Segmentation fault).
+> Stack base at 0x7f3214ff5000
+> Top of stack 0x7f32157f5070
+> Stack loc for regs 0x7f32157f5060
+> loc attempting to write to for ra 0x7f32157f5060
+> Add of wrap 0x7f3215bc52ce
+> RA loc 0x7f32157f5068
+> Add at ra loc 0x7f3215bc52ce
+> rbp loc 0x7f32157f5060
+> Add at rbp loc 0x7f32157f5070
+> rbp to become rsp 0x7f32157f5060
+> Admitted thread 0x20bd010
+> In Admitted: Head 0x20bd010
+> Stack base at 0x7f32147f4000
+> Top of stack 0x7f3214ff4070
+> Stack loc for regs 0x7f3214ff4060
+> loc attempting to write to for ra 0x7f3214ff4060
+> Add of wrap 0x7f3215bc52ce
+> RA loc 0x7f3214ff4068
+> Add at ra loc 0x7f3215bc52ce
+> rbp loc 0x7f3214ff4060
+> Add at rbp loc 0x7f3214ff4070
+> rbp to become rsp 0x7f3214ff4060
+> Admitted thread 0x20bd030
+> In Admitted: Head 0x20bd010
+> Next 0x20bd030
+> Stack base at 0x7f3213ff3000
+> Top of stack 0x7f32147f3070
+> Stack loc for regs 0x7f32147f3060
+> loc attempting to write to for ra 0x7f32147f3060
+> Add of wrap 0x7f3215bc52ce
+> RA loc 0x7f32147f3068
+> Add at ra loc 0x7f3215bc52ce
+> rbp loc 0x7f32147f3060
+> Add at rbp loc 0x7f32147f3070
+> rbp to become rsp 0x7f32147f3060
+> Admitted thread 0x20bd050
+> In Admitted: Head 0x20bd010
+> Stack base at 0x7f32137f2000
+> Top of stack 0x7f3213ff2070
+> Stack loc for regs 0x7f3213ff2060
+> loc attempting to write to for ra 0x7f3213ff2060
+> Add of wrap 0x7f3215bc52ce
+> RA loc 0x7f3213ff2068
+> Add at ra loc 0x7f3215bc52ce
+> rbp loc 0x7f3213ff2060
+> Add at rbp loc 0x7f3213ff2070
+> rbp to become rsp 0x7f3213ff2060
+> Admitted thread 0x20bd070
+> In Admitted: Head 0x20bd010
+> Stack base at 0x7f3212ff1000
+> Top of stack 0x7f32137f1070
+> Stack loc for regs 0x7f32137f1060
+> loc attempting to write to for ra 0x7f32137f1060
+> Add of wrap 0x7f3215bc52ce
+> RA loc 0x7f32137f1068
+> Add at ra loc 0x7f3215bc52ce
+> rbp loc 0x7f32137f1060
+> Add at rbp loc 0x7f32137f1070
+> rbp to become rsp 0x7f32137f1060
+> Admitted thread 0x20bd090
+> In Admitted: Head 0x20bd010
+> Admitted thread 0x20bd0b0
+> In Admitted: Head 0x20bd010
+> In Next: Head 0x20bd010
+> New Head (nil)
+> Child process (16451) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 9: Five lwps, calling lwp_yield(), then lwp_exit()
@@ -283,13 +590,78 @@ LWPs have ended.
 ----------
 Submitted:
 ----------
-Child process (6925) exited due to signal (Segmentation fault).
+Stack base at 0x7f3c3547f000
+Top of stack 0x7f3c35c7f070
+Stack loc for regs 0x7f3c35c7f060
+loc attempting to write to for ra 0x7f3c35c7f060
+Add of wrap 0x7f3c3604f2ce
+RA loc 0x7f3c35c7f068
+Add at ra loc 0x7f3c3604f2ce
+rbp loc 0x7f3c35c7f060
+Add at rbp loc 0x7f3c35c7f070
+rbp to become rsp 0x7f3c35c7f060
+Admitted thread 0xea9010
+In Admitted: Head 0xea9010
+Stack base at 0x7f3c34c7e000
+Top of stack 0x7f3c3547e070
+Stack loc for regs 0x7f3c3547e060
+loc attempting to write to for ra 0x7f3c3547e060
+Add of wrap 0x7f3c3604f2ce
+RA loc 0x7f3c3547e068
+Add at ra loc 0x7f3c3604f2ce
+rbp loc 0x7f3c3547e060
+Add at rbp loc 0x7f3c3547e070
+rbp to become rsp 0x7f3c3547e060
+Admitted thread 0xea9030
+In Admitted: Head 0xea9010
+Next 0xea9030
+Stack base at 0x7f3c3447d000
+Top of stack 0x7f3c34c7d070
+Stack loc for regs 0x7f3c34c7d060
+loc attempting to write to for ra 0x7f3c34c7d060
+Add of wrap 0x7f3c3604f2ce
+RA loc 0x7f3c34c7d068
+Add at ra loc 0x7f3c3604f2ce
+rbp loc 0x7f3c34c7d060
+Add at rbp loc 0x7f3c34c7d070
+rbp to become rsp 0x7f3c34c7d060
+Admitted thread 0xea9050
+In Admitted: Head 0xea9010
+Stack base at 0x7f3c33c7c000
+Top of stack 0x7f3c3447c070
+Stack loc for regs 0x7f3c3447c060
+loc attempting to write to for ra 0x7f3c3447c060
+Add of wrap 0x7f3c3604f2ce
+RA loc 0x7f3c3447c068
+Add at ra loc 0x7f3c3604f2ce
+rbp loc 0x7f3c3447c060
+Add at rbp loc 0x7f3c3447c070
+rbp to become rsp 0x7f3c3447c060
+Admitted thread 0xea9070
+In Admitted: Head 0xea9010
+Stack base at 0x7f3c3347b000
+Top of stack 0x7f3c33c7b070
+Stack loc for regs 0x7f3c33c7b060
+loc attempting to write to for ra 0x7f3c33c7b060
+Add of wrap 0x7f3c3604f2ce
+RA loc 0x7f3c33c7b068
+Add at ra loc 0x7f3c3604f2ce
+rbp loc 0x7f3c33c7b060
+Add at rbp loc 0x7f3c33c7b070
+rbp to become rsp 0x7f3c33c7b060
+Admitted thread 0xea9090
+In Admitted: Head 0xea9010
+Admitted thread 0xea90b0
+In Admitted: Head 0xea9010
+In Next: Head 0xea9010
+New Head (nil)
+Child process (16520) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,11c1
+1,11c1,66
 < Greetings from Thread 0.  Yielding...
 < Greetings from Thread 1.  Yielding...
 < Greetings from Thread 2.  Yielding...
@@ -302,7 +674,72 @@ Differences (< reference > output)
 < I (4) am still alive.  Goodbye.
 < LWPs have ended.
 ---
-> Child process (6925) exited due to signal (Segmentation fault).
+> Stack base at 0x7f3c3547f000
+> Top of stack 0x7f3c35c7f070
+> Stack loc for regs 0x7f3c35c7f060
+> loc attempting to write to for ra 0x7f3c35c7f060
+> Add of wrap 0x7f3c3604f2ce
+> RA loc 0x7f3c35c7f068
+> Add at ra loc 0x7f3c3604f2ce
+> rbp loc 0x7f3c35c7f060
+> Add at rbp loc 0x7f3c35c7f070
+> rbp to become rsp 0x7f3c35c7f060
+> Admitted thread 0xea9010
+> In Admitted: Head 0xea9010
+> Stack base at 0x7f3c34c7e000
+> Top of stack 0x7f3c3547e070
+> Stack loc for regs 0x7f3c3547e060
+> loc attempting to write to for ra 0x7f3c3547e060
+> Add of wrap 0x7f3c3604f2ce
+> RA loc 0x7f3c3547e068
+> Add at ra loc 0x7f3c3604f2ce
+> rbp loc 0x7f3c3547e060
+> Add at rbp loc 0x7f3c3547e070
+> rbp to become rsp 0x7f3c3547e060
+> Admitted thread 0xea9030
+> In Admitted: Head 0xea9010
+> Next 0xea9030
+> Stack base at 0x7f3c3447d000
+> Top of stack 0x7f3c34c7d070
+> Stack loc for regs 0x7f3c34c7d060
+> loc attempting to write to for ra 0x7f3c34c7d060
+> Add of wrap 0x7f3c3604f2ce
+> RA loc 0x7f3c34c7d068
+> Add at ra loc 0x7f3c3604f2ce
+> rbp loc 0x7f3c34c7d060
+> Add at rbp loc 0x7f3c34c7d070
+> rbp to become rsp 0x7f3c34c7d060
+> Admitted thread 0xea9050
+> In Admitted: Head 0xea9010
+> Stack base at 0x7f3c33c7c000
+> Top of stack 0x7f3c3447c070
+> Stack loc for regs 0x7f3c3447c060
+> loc attempting to write to for ra 0x7f3c3447c060
+> Add of wrap 0x7f3c3604f2ce
+> RA loc 0x7f3c3447c068
+> Add at ra loc 0x7f3c3604f2ce
+> rbp loc 0x7f3c3447c060
+> Add at rbp loc 0x7f3c3447c070
+> rbp to become rsp 0x7f3c3447c060
+> Admitted thread 0xea9070
+> In Admitted: Head 0xea9010
+> Stack base at 0x7f3c3347b000
+> Top of stack 0x7f3c33c7b070
+> Stack loc for regs 0x7f3c33c7b060
+> loc attempting to write to for ra 0x7f3c33c7b060
+> Add of wrap 0x7f3c3604f2ce
+> RA loc 0x7f3c33c7b068
+> Add at ra loc 0x7f3c3604f2ce
+> rbp loc 0x7f3c33c7b060
+> Add at rbp loc 0x7f3c33c7b070
+> rbp to become rsp 0x7f3c33c7b060
+> Admitted thread 0xea9090
+> In Admitted: Head 0xea9010
+> Admitted thread 0xea90b0
+> In Admitted: Head 0xea9010
+> In Next: Head 0xea9010
+> New Head (nil)
+> Child process (16520) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 10: Five threads, variable iters, exit from front
@@ -334,13 +771,78 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (6957) exited due to signal (Segmentation fault).
+Stack base at 0x7fc03b353000
+Top of stack 0x7fc03bb53070
+Stack loc for regs 0x7fc03bb53060
+loc attempting to write to for ra 0x7fc03bb53060
+Add of wrap 0x7fc03bf232ce
+RA loc 0x7fc03bb53068
+Add at ra loc 0x7fc03bf232ce
+rbp loc 0x7fc03bb53060
+Add at rbp loc 0x7fc03bb53070
+rbp to become rsp 0x7fc03bb53060
+Admitted thread 0x442010
+In Admitted: Head 0x442010
+Stack base at 0x7fc03ab52000
+Top of stack 0x7fc03b352070
+Stack loc for regs 0x7fc03b352060
+loc attempting to write to for ra 0x7fc03b352060
+Add of wrap 0x7fc03bf232ce
+RA loc 0x7fc03b352068
+Add at ra loc 0x7fc03bf232ce
+rbp loc 0x7fc03b352060
+Add at rbp loc 0x7fc03b352070
+rbp to become rsp 0x7fc03b352060
+Admitted thread 0x442030
+In Admitted: Head 0x442010
+Next 0x442030
+Stack base at 0x7fc03a351000
+Top of stack 0x7fc03ab51070
+Stack loc for regs 0x7fc03ab51060
+loc attempting to write to for ra 0x7fc03ab51060
+Add of wrap 0x7fc03bf232ce
+RA loc 0x7fc03ab51068
+Add at ra loc 0x7fc03bf232ce
+rbp loc 0x7fc03ab51060
+Add at rbp loc 0x7fc03ab51070
+rbp to become rsp 0x7fc03ab51060
+Admitted thread 0x442050
+In Admitted: Head 0x442010
+Stack base at 0x7fc039b50000
+Top of stack 0x7fc03a350070
+Stack loc for regs 0x7fc03a350060
+loc attempting to write to for ra 0x7fc03a350060
+Add of wrap 0x7fc03bf232ce
+RA loc 0x7fc03a350068
+Add at ra loc 0x7fc03bf232ce
+rbp loc 0x7fc03a350060
+Add at rbp loc 0x7fc03a350070
+rbp to become rsp 0x7fc03a350060
+Admitted thread 0x442070
+In Admitted: Head 0x442010
+Stack base at 0x7fc03934f000
+Top of stack 0x7fc039b4f070
+Stack loc for regs 0x7fc039b4f060
+loc attempting to write to for ra 0x7fc039b4f060
+Add of wrap 0x7fc03bf232ce
+RA loc 0x7fc039b4f068
+Add at ra loc 0x7fc03bf232ce
+rbp loc 0x7fc039b4f060
+Add at rbp loc 0x7fc039b4f070
+rbp to become rsp 0x7fc039b4f060
+Admitted thread 0x442090
+In Admitted: Head 0x442010
+Admitted thread 0x4420b0
+In Admitted: Head 0x442010
+In Next: Head 0x442010
+New Head (nil)
+Child process (16553) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,17c1
+1,17c1,66
 < Launching LWPS
 <     1
 <          2
@@ -359,7 +861,72 @@ Differences (< reference > output)
 <                         5
 < Back from LWPS.
 ---
-> Child process (6957) exited due to signal (Segmentation fault).
+> Stack base at 0x7fc03b353000
+> Top of stack 0x7fc03bb53070
+> Stack loc for regs 0x7fc03bb53060
+> loc attempting to write to for ra 0x7fc03bb53060
+> Add of wrap 0x7fc03bf232ce
+> RA loc 0x7fc03bb53068
+> Add at ra loc 0x7fc03bf232ce
+> rbp loc 0x7fc03bb53060
+> Add at rbp loc 0x7fc03bb53070
+> rbp to become rsp 0x7fc03bb53060
+> Admitted thread 0x442010
+> In Admitted: Head 0x442010
+> Stack base at 0x7fc03ab52000
+> Top of stack 0x7fc03b352070
+> Stack loc for regs 0x7fc03b352060
+> loc attempting to write to for ra 0x7fc03b352060
+> Add of wrap 0x7fc03bf232ce
+> RA loc 0x7fc03b352068
+> Add at ra loc 0x7fc03bf232ce
+> rbp loc 0x7fc03b352060
+> Add at rbp loc 0x7fc03b352070
+> rbp to become rsp 0x7fc03b352060
+> Admitted thread 0x442030
+> In Admitted: Head 0x442010
+> Next 0x442030
+> Stack base at 0x7fc03a351000
+> Top of stack 0x7fc03ab51070
+> Stack loc for regs 0x7fc03ab51060
+> loc attempting to write to for ra 0x7fc03ab51060
+> Add of wrap 0x7fc03bf232ce
+> RA loc 0x7fc03ab51068
+> Add at ra loc 0x7fc03bf232ce
+> rbp loc 0x7fc03ab51060
+> Add at rbp loc 0x7fc03ab51070
+> rbp to become rsp 0x7fc03ab51060
+> Admitted thread 0x442050
+> In Admitted: Head 0x442010
+> Stack base at 0x7fc039b50000
+> Top of stack 0x7fc03a350070
+> Stack loc for regs 0x7fc03a350060
+> loc attempting to write to for ra 0x7fc03a350060
+> Add of wrap 0x7fc03bf232ce
+> RA loc 0x7fc03a350068
+> Add at ra loc 0x7fc03bf232ce
+> rbp loc 0x7fc03a350060
+> Add at rbp loc 0x7fc03a350070
+> rbp to become rsp 0x7fc03a350060
+> Admitted thread 0x442070
+> In Admitted: Head 0x442010
+> Stack base at 0x7fc03934f000
+> Top of stack 0x7fc039b4f070
+> Stack loc for regs 0x7fc039b4f060
+> loc attempting to write to for ra 0x7fc039b4f060
+> Add of wrap 0x7fc03bf232ce
+> RA loc 0x7fc039b4f068
+> Add at ra loc 0x7fc03bf232ce
+> rbp loc 0x7fc039b4f060
+> Add at rbp loc 0x7fc039b4f070
+> rbp to become rsp 0x7fc039b4f060
+> Admitted thread 0x442090
+> In Admitted: Head 0x442010
+> Admitted thread 0x4420b0
+> In Admitted: Head 0x442010
+> In Next: Head 0x442010
+> New Head (nil)
+> Child process (16553) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 11: Five threads, variable iters, exit from front
@@ -396,13 +963,78 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (6989) exited due to signal (Segmentation fault).
+Stack base at 0x7f9411799000
+Top of stack 0x7f9411f99070
+Stack loc for regs 0x7f9411f99060
+loc attempting to write to for ra 0x7f9411f99060
+Add of wrap 0x7f94123692ce
+RA loc 0x7f9411f99068
+Add at ra loc 0x7f94123692ce
+rbp loc 0x7f9411f99060
+Add at rbp loc 0x7f9411f99070
+rbp to become rsp 0x7f9411f99060
+Admitted thread 0x1086010
+In Admitted: Head 0x1086010
+Stack base at 0x7f9410f98000
+Top of stack 0x7f9411798070
+Stack loc for regs 0x7f9411798060
+loc attempting to write to for ra 0x7f9411798060
+Add of wrap 0x7f94123692ce
+RA loc 0x7f9411798068
+Add at ra loc 0x7f94123692ce
+rbp loc 0x7f9411798060
+Add at rbp loc 0x7f9411798070
+rbp to become rsp 0x7f9411798060
+Admitted thread 0x1086030
+In Admitted: Head 0x1086010
+Next 0x1086030
+Stack base at 0x7f9410797000
+Top of stack 0x7f9410f97070
+Stack loc for regs 0x7f9410f97060
+loc attempting to write to for ra 0x7f9410f97060
+Add of wrap 0x7f94123692ce
+RA loc 0x7f9410f97068
+Add at ra loc 0x7f94123692ce
+rbp loc 0x7f9410f97060
+Add at rbp loc 0x7f9410f97070
+rbp to become rsp 0x7f9410f97060
+Admitted thread 0x1086050
+In Admitted: Head 0x1086010
+Stack base at 0x7f940ff96000
+Top of stack 0x7f9410796070
+Stack loc for regs 0x7f9410796060
+loc attempting to write to for ra 0x7f9410796060
+Add of wrap 0x7f94123692ce
+RA loc 0x7f9410796068
+Add at ra loc 0x7f94123692ce
+rbp loc 0x7f9410796060
+Add at rbp loc 0x7f9410796070
+rbp to become rsp 0x7f9410796060
+Admitted thread 0x1086070
+In Admitted: Head 0x1086010
+Stack base at 0x7f940f795000
+Top of stack 0x7f940ff95070
+Stack loc for regs 0x7f940ff95060
+loc attempting to write to for ra 0x7f940ff95060
+Add of wrap 0x7f94123692ce
+RA loc 0x7f940ff95068
+Add at ra loc 0x7f94123692ce
+rbp loc 0x7f940ff95060
+Add at rbp loc 0x7f940ff95070
+rbp to become rsp 0x7f940ff95060
+Admitted thread 0x1086090
+In Admitted: Head 0x1086010
+Admitted thread 0x10860b0
+In Admitted: Head 0x1086010
+In Next: Head 0x1086010
+New Head (nil)
+Child process (16585) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,22c1
+1,22c1,66
 < Launching LWPS
 <     1
 <          2
@@ -426,7 +1058,72 @@ Differences (< reference > output)
 < A thread exited with status 5
 < Back from LWPS.
 ---
-> Child process (6989) exited due to signal (Segmentation fault).
+> Stack base at 0x7f9411799000
+> Top of stack 0x7f9411f99070
+> Stack loc for regs 0x7f9411f99060
+> loc attempting to write to for ra 0x7f9411f99060
+> Add of wrap 0x7f94123692ce
+> RA loc 0x7f9411f99068
+> Add at ra loc 0x7f94123692ce
+> rbp loc 0x7f9411f99060
+> Add at rbp loc 0x7f9411f99070
+> rbp to become rsp 0x7f9411f99060
+> Admitted thread 0x1086010
+> In Admitted: Head 0x1086010
+> Stack base at 0x7f9410f98000
+> Top of stack 0x7f9411798070
+> Stack loc for regs 0x7f9411798060
+> loc attempting to write to for ra 0x7f9411798060
+> Add of wrap 0x7f94123692ce
+> RA loc 0x7f9411798068
+> Add at ra loc 0x7f94123692ce
+> rbp loc 0x7f9411798060
+> Add at rbp loc 0x7f9411798070
+> rbp to become rsp 0x7f9411798060
+> Admitted thread 0x1086030
+> In Admitted: Head 0x1086010
+> Next 0x1086030
+> Stack base at 0x7f9410797000
+> Top of stack 0x7f9410f97070
+> Stack loc for regs 0x7f9410f97060
+> loc attempting to write to for ra 0x7f9410f97060
+> Add of wrap 0x7f94123692ce
+> RA loc 0x7f9410f97068
+> Add at ra loc 0x7f94123692ce
+> rbp loc 0x7f9410f97060
+> Add at rbp loc 0x7f9410f97070
+> rbp to become rsp 0x7f9410f97060
+> Admitted thread 0x1086050
+> In Admitted: Head 0x1086010
+> Stack base at 0x7f940ff96000
+> Top of stack 0x7f9410796070
+> Stack loc for regs 0x7f9410796060
+> loc attempting to write to for ra 0x7f9410796060
+> Add of wrap 0x7f94123692ce
+> RA loc 0x7f9410796068
+> Add at ra loc 0x7f94123692ce
+> rbp loc 0x7f9410796060
+> Add at rbp loc 0x7f9410796070
+> rbp to become rsp 0x7f9410796060
+> Admitted thread 0x1086070
+> In Admitted: Head 0x1086010
+> Stack base at 0x7f940f795000
+> Top of stack 0x7f940ff95070
+> Stack loc for regs 0x7f940ff95060
+> loc attempting to write to for ra 0x7f940ff95060
+> Add of wrap 0x7f94123692ce
+> RA loc 0x7f940ff95068
+> Add at ra loc 0x7f94123692ce
+> rbp loc 0x7f940ff95060
+> Add at rbp loc 0x7f940ff95070
+> rbp to become rsp 0x7f940ff95060
+> Admitted thread 0x1086090
+> In Admitted: Head 0x1086010
+> Admitted thread 0x10860b0
+> In Admitted: Head 0x1086010
+> In Next: Head 0x1086010
+> New Head (nil)
+> Child process (16585) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 12: Five threads, variable iters, exit from back
@@ -459,13 +1156,78 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (7033) exited due to signal (Segmentation fault).
+Stack base at 0x7f4d20b90000
+Top of stack 0x7f4d21390070
+Stack loc for regs 0x7f4d21390060
+loc attempting to write to for ra 0x7f4d21390060
+Add of wrap 0x7f4d217602ce
+RA loc 0x7f4d21390068
+Add at ra loc 0x7f4d217602ce
+rbp loc 0x7f4d21390060
+Add at rbp loc 0x7f4d21390070
+rbp to become rsp 0x7f4d21390060
+Admitted thread 0x171e010
+In Admitted: Head 0x171e010
+Stack base at 0x7f4d2038f000
+Top of stack 0x7f4d20b8f070
+Stack loc for regs 0x7f4d20b8f060
+loc attempting to write to for ra 0x7f4d20b8f060
+Add of wrap 0x7f4d217602ce
+RA loc 0x7f4d20b8f068
+Add at ra loc 0x7f4d217602ce
+rbp loc 0x7f4d20b8f060
+Add at rbp loc 0x7f4d20b8f070
+rbp to become rsp 0x7f4d20b8f060
+Admitted thread 0x171e030
+In Admitted: Head 0x171e010
+Next 0x171e030
+Stack base at 0x7f4d1fb8e000
+Top of stack 0x7f4d2038e070
+Stack loc for regs 0x7f4d2038e060
+loc attempting to write to for ra 0x7f4d2038e060
+Add of wrap 0x7f4d217602ce
+RA loc 0x7f4d2038e068
+Add at ra loc 0x7f4d217602ce
+rbp loc 0x7f4d2038e060
+Add at rbp loc 0x7f4d2038e070
+rbp to become rsp 0x7f4d2038e060
+Admitted thread 0x171e050
+In Admitted: Head 0x171e010
+Stack base at 0x7f4d1f38d000
+Top of stack 0x7f4d1fb8d070
+Stack loc for regs 0x7f4d1fb8d060
+loc attempting to write to for ra 0x7f4d1fb8d060
+Add of wrap 0x7f4d217602ce
+RA loc 0x7f4d1fb8d068
+Add at ra loc 0x7f4d217602ce
+rbp loc 0x7f4d1fb8d060
+Add at rbp loc 0x7f4d1fb8d070
+rbp to become rsp 0x7f4d1fb8d060
+Admitted thread 0x171e070
+In Admitted: Head 0x171e010
+Stack base at 0x7f4d1eb8c000
+Top of stack 0x7f4d1f38c070
+Stack loc for regs 0x7f4d1f38c060
+loc attempting to write to for ra 0x7f4d1f38c060
+Add of wrap 0x7f4d217602ce
+RA loc 0x7f4d1f38c068
+Add at ra loc 0x7f4d217602ce
+rbp loc 0x7f4d1f38c060
+Add at rbp loc 0x7f4d1f38c070
+rbp to become rsp 0x7f4d1f38c060
+Admitted thread 0x171e090
+In Admitted: Head 0x171e010
+Admitted thread 0x171e0b0
+In Admitted: Head 0x171e010
+In Next: Head 0x171e010
+New Head (nil)
+Child process (16617) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,17c1
+1,17c1,66
 < Launching LWPS
 <     1
 <          2
@@ -484,7 +1246,72 @@ Differences (< reference > output)
 <     1
 < Back from LWPS.
 ---
-> Child process (7033) exited due to signal (Segmentation fault).
+> Stack base at 0x7f4d20b90000
+> Top of stack 0x7f4d21390070
+> Stack loc for regs 0x7f4d21390060
+> loc attempting to write to for ra 0x7f4d21390060
+> Add of wrap 0x7f4d217602ce
+> RA loc 0x7f4d21390068
+> Add at ra loc 0x7f4d217602ce
+> rbp loc 0x7f4d21390060
+> Add at rbp loc 0x7f4d21390070
+> rbp to become rsp 0x7f4d21390060
+> Admitted thread 0x171e010
+> In Admitted: Head 0x171e010
+> Stack base at 0x7f4d2038f000
+> Top of stack 0x7f4d20b8f070
+> Stack loc for regs 0x7f4d20b8f060
+> loc attempting to write to for ra 0x7f4d20b8f060
+> Add of wrap 0x7f4d217602ce
+> RA loc 0x7f4d20b8f068
+> Add at ra loc 0x7f4d217602ce
+> rbp loc 0x7f4d20b8f060
+> Add at rbp loc 0x7f4d20b8f070
+> rbp to become rsp 0x7f4d20b8f060
+> Admitted thread 0x171e030
+> In Admitted: Head 0x171e010
+> Next 0x171e030
+> Stack base at 0x7f4d1fb8e000
+> Top of stack 0x7f4d2038e070
+> Stack loc for regs 0x7f4d2038e060
+> loc attempting to write to for ra 0x7f4d2038e060
+> Add of wrap 0x7f4d217602ce
+> RA loc 0x7f4d2038e068
+> Add at ra loc 0x7f4d217602ce
+> rbp loc 0x7f4d2038e060
+> Add at rbp loc 0x7f4d2038e070
+> rbp to become rsp 0x7f4d2038e060
+> Admitted thread 0x171e050
+> In Admitted: Head 0x171e010
+> Stack base at 0x7f4d1f38d000
+> Top of stack 0x7f4d1fb8d070
+> Stack loc for regs 0x7f4d1fb8d060
+> loc attempting to write to for ra 0x7f4d1fb8d060
+> Add of wrap 0x7f4d217602ce
+> RA loc 0x7f4d1fb8d068
+> Add at ra loc 0x7f4d217602ce
+> rbp loc 0x7f4d1fb8d060
+> Add at rbp loc 0x7f4d1fb8d070
+> rbp to become rsp 0x7f4d1fb8d060
+> Admitted thread 0x171e070
+> In Admitted: Head 0x171e010
+> Stack base at 0x7f4d1eb8c000
+> Top of stack 0x7f4d1f38c070
+> Stack loc for regs 0x7f4d1f38c060
+> loc attempting to write to for ra 0x7f4d1f38c060
+> Add of wrap 0x7f4d217602ce
+> RA loc 0x7f4d1f38c068
+> Add at ra loc 0x7f4d217602ce
+> rbp loc 0x7f4d1f38c060
+> Add at rbp loc 0x7f4d1f38c070
+> rbp to become rsp 0x7f4d1f38c060
+> Admitted thread 0x171e090
+> In Admitted: Head 0x171e010
+> Admitted thread 0x171e0b0
+> In Admitted: Head 0x171e010
+> In Next: Head 0x171e010
+> New Head (nil)
+> Child process (16617) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 13: Five threads, AlwaysZero scheduling
@@ -517,13 +1344,33 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (7065) exited due to signal (Segmentation fault).
+Stack base at 0x7f717dce9000
+Top of stack 0x7f717e4e9070
+Stack loc for regs 0x7f717e4e9060
+loc attempting to write to for ra 0x7f717e4e9060
+Add of wrap 0x7f717e8b92ce
+RA loc 0x7f717e4e9068
+Add at ra loc 0x7f717e8b92ce
+rbp loc 0x7f717e4e9060
+Add at rbp loc 0x7f717e4e9070
+rbp to become rsp 0x7f717e4e9060
+Stack base at 0x7f717d4e8000
+Top of stack 0x7f717dce8070
+Stack loc for regs 0x7f717dce8060
+loc attempting to write to for ra 0x7f717dce8060
+Add of wrap 0x7f717e8b92ce
+RA loc 0x7f717dce8068
+Add at ra loc 0x7f717e8b92ce
+rbp loc 0x7f717dce8060
+Add at rbp loc 0x7f717dce8070
+rbp to become rsp 0x7f717dce8060
+Child process (16649) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,17c1
+1,17c1,21
 < Launching LWPS
 <     1
 <          2
@@ -542,7 +1389,27 @@ Differences (< reference > output)
 <                         5
 < Back from LWPS.
 ---
-> Child process (7065) exited due to signal (Segmentation fault).
+> Stack base at 0x7f717dce9000
+> Top of stack 0x7f717e4e9070
+> Stack loc for regs 0x7f717e4e9060
+> loc attempting to write to for ra 0x7f717e4e9060
+> Add of wrap 0x7f717e8b92ce
+> RA loc 0x7f717e4e9068
+> Add at ra loc 0x7f717e8b92ce
+> rbp loc 0x7f717e4e9060
+> Add at rbp loc 0x7f717e4e9070
+> rbp to become rsp 0x7f717e4e9060
+> Stack base at 0x7f717d4e8000
+> Top of stack 0x7f717dce8070
+> Stack loc for regs 0x7f717dce8060
+> loc attempting to write to for ra 0x7f717dce8060
+> Add of wrap 0x7f717e8b92ce
+> RA loc 0x7f717dce8068
+> Add at ra loc 0x7f717e8b92ce
+> rbp loc 0x7f717dce8060
+> Add at rbp loc 0x7f717dce8070
+> rbp to become rsp 0x7f717dce8060
+> Child process (16649) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 14: One lwp, yields, and returns
@@ -559,18 +1426,62 @@ After thread termination
 ----------
 Submitted:
 ----------
-Child process (7097) exited due to signal (Segmentation fault).
+Stack base at 0x7f640c06c000
+Top of stack 0x7f640c86c070
+Stack loc for regs 0x7f640c86c060
+loc attempting to write to for ra 0x7f640c86c060
+Add of wrap 0x7f640cc3c2ce
+RA loc 0x7f640c86c068
+Add at ra loc 0x7f640cc3c2ce
+rbp loc 0x7f640c86c060
+Add at rbp loc 0x7f640c86c070
+rbp to become rsp 0x7f640c86c060
+Admitted thread 0x227f010
+In Admitted: Head 0x227f010
+Admitted thread 0x227f030
+In Admitted: Head 0x227f010
+Next 0x227f030
+In Next: Head 0x227f010
+Next 0x227f030
+New Head 0x227f030
+Next 0x227f010
+Add of next thread 0x227f010
+Calling Thread 0x227f030
+Next Thread 0x227f010
+Child process (16686) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,3c1
+1,3c1,23
 < Greetings from Thread 0.  Yielding...
 < I'm still alive.  Goodbye
 < After thread termination
 ---
-> Child process (7097) exited due to signal (Segmentation fault).
+> Stack base at 0x7f640c06c000
+> Top of stack 0x7f640c86c070
+> Stack loc for regs 0x7f640c86c060
+> loc attempting to write to for ra 0x7f640c86c060
+> Add of wrap 0x7f640cc3c2ce
+> RA loc 0x7f640c86c068
+> Add at ra loc 0x7f640cc3c2ce
+> rbp loc 0x7f640c86c060
+> Add at rbp loc 0x7f640c86c070
+> rbp to become rsp 0x7f640c86c060
+> Admitted thread 0x227f010
+> In Admitted: Head 0x227f010
+> Admitted thread 0x227f030
+> In Admitted: Head 0x227f010
+> Next 0x227f030
+> In Next: Head 0x227f010
+> Next 0x227f030
+> New Head 0x227f030
+> Next 0x227f010
+> Add of next thread 0x227f010
+> Calling Thread 0x227f030
+> Next Thread 0x227f010
+> Child process (16686) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 15: Ten lwps, yields, and returns
@@ -605,13 +1516,138 @@ After thread termination
 ----------
 Submitted:
 ----------
-Child process (7129) exited due to signal (Segmentation fault).
+Stack base at 0x7f50d7d24000
+Top of stack 0x7f50d8524070
+Stack loc for regs 0x7f50d8524060
+loc attempting to write to for ra 0x7f50d8524060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d8524068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d8524060
+Add at rbp loc 0x7f50d8524070
+rbp to become rsp 0x7f50d8524060
+Admitted thread 0x20f5010
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d7523000
+Top of stack 0x7f50d7d23070
+Stack loc for regs 0x7f50d7d23060
+loc attempting to write to for ra 0x7f50d7d23060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d7d23068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d7d23060
+Add at rbp loc 0x7f50d7d23070
+rbp to become rsp 0x7f50d7d23060
+Admitted thread 0x20f5030
+In Admitted: Head 0x20f5010
+Next 0x20f5030
+Stack base at 0x7f50d6d22000
+Top of stack 0x7f50d7522070
+Stack loc for regs 0x7f50d7522060
+loc attempting to write to for ra 0x7f50d7522060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d7522068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d7522060
+Add at rbp loc 0x7f50d7522070
+rbp to become rsp 0x7f50d7522060
+Admitted thread 0x20f5050
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d6521000
+Top of stack 0x7f50d6d21070
+Stack loc for regs 0x7f50d6d21060
+loc attempting to write to for ra 0x7f50d6d21060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d6d21068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d6d21060
+Add at rbp loc 0x7f50d6d21070
+rbp to become rsp 0x7f50d6d21060
+Admitted thread 0x20f5070
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d5d20000
+Top of stack 0x7f50d6520070
+Stack loc for regs 0x7f50d6520060
+loc attempting to write to for ra 0x7f50d6520060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d6520068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d6520060
+Add at rbp loc 0x7f50d6520070
+rbp to become rsp 0x7f50d6520060
+Admitted thread 0x20f5090
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d551f000
+Top of stack 0x7f50d5d1f070
+Stack loc for regs 0x7f50d5d1f060
+loc attempting to write to for ra 0x7f50d5d1f060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d5d1f068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d5d1f060
+Add at rbp loc 0x7f50d5d1f070
+rbp to become rsp 0x7f50d5d1f060
+Admitted thread 0x20f50b0
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d4d1e000
+Top of stack 0x7f50d551e070
+Stack loc for regs 0x7f50d551e060
+loc attempting to write to for ra 0x7f50d551e060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d551e068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d551e060
+Add at rbp loc 0x7f50d551e070
+rbp to become rsp 0x7f50d551e060
+Admitted thread 0x20f50d0
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d451d000
+Top of stack 0x7f50d4d1d070
+Stack loc for regs 0x7f50d4d1d060
+loc attempting to write to for ra 0x7f50d4d1d060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d4d1d068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d4d1d060
+Add at rbp loc 0x7f50d4d1d070
+rbp to become rsp 0x7f50d4d1d060
+Admitted thread 0x20f50f0
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d3d1c000
+Top of stack 0x7f50d451c070
+Stack loc for regs 0x7f50d451c060
+loc attempting to write to for ra 0x7f50d451c060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d451c068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d451c060
+Add at rbp loc 0x7f50d451c070
+rbp to become rsp 0x7f50d451c060
+Admitted thread 0x20f5110
+In Admitted: Head 0x20f5010
+Stack base at 0x7f50d351b000
+Top of stack 0x7f50d3d1b070
+Stack loc for regs 0x7f50d3d1b060
+loc attempting to write to for ra 0x7f50d3d1b060
+Add of wrap 0x7f50d88f42ce
+RA loc 0x7f50d3d1b068
+Add at ra loc 0x7f50d88f42ce
+rbp loc 0x7f50d3d1b060
+Add at rbp loc 0x7f50d3d1b070
+rbp to become rsp 0x7f50d3d1b060
+Admitted thread 0x20f5130
+In Admitted: Head 0x20f5010
+Admitted thread 0x20f5150
+In Admitted: Head 0x20f5010
+In Next: Head 0x20f5010
+New Head (nil)
+Child process (16725) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,21c1
+1,21c1,126
 < Greetings from Thread 0.  Yielding...
 < Greetings from Thread 1.  Yielding...
 < Greetings from Thread 2.  Yielding...
@@ -634,7 +1670,132 @@ Differences (< reference > output)
 < I'm still alive.  Goodbye
 < After thread termination
 ---
-> Child process (7129) exited due to signal (Segmentation fault).
+> Stack base at 0x7f50d7d24000
+> Top of stack 0x7f50d8524070
+> Stack loc for regs 0x7f50d8524060
+> loc attempting to write to for ra 0x7f50d8524060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d8524068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d8524060
+> Add at rbp loc 0x7f50d8524070
+> rbp to become rsp 0x7f50d8524060
+> Admitted thread 0x20f5010
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d7523000
+> Top of stack 0x7f50d7d23070
+> Stack loc for regs 0x7f50d7d23060
+> loc attempting to write to for ra 0x7f50d7d23060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d7d23068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d7d23060
+> Add at rbp loc 0x7f50d7d23070
+> rbp to become rsp 0x7f50d7d23060
+> Admitted thread 0x20f5030
+> In Admitted: Head 0x20f5010
+> Next 0x20f5030
+> Stack base at 0x7f50d6d22000
+> Top of stack 0x7f50d7522070
+> Stack loc for regs 0x7f50d7522060
+> loc attempting to write to for ra 0x7f50d7522060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d7522068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d7522060
+> Add at rbp loc 0x7f50d7522070
+> rbp to become rsp 0x7f50d7522060
+> Admitted thread 0x20f5050
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d6521000
+> Top of stack 0x7f50d6d21070
+> Stack loc for regs 0x7f50d6d21060
+> loc attempting to write to for ra 0x7f50d6d21060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d6d21068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d6d21060
+> Add at rbp loc 0x7f50d6d21070
+> rbp to become rsp 0x7f50d6d21060
+> Admitted thread 0x20f5070
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d5d20000
+> Top of stack 0x7f50d6520070
+> Stack loc for regs 0x7f50d6520060
+> loc attempting to write to for ra 0x7f50d6520060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d6520068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d6520060
+> Add at rbp loc 0x7f50d6520070
+> rbp to become rsp 0x7f50d6520060
+> Admitted thread 0x20f5090
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d551f000
+> Top of stack 0x7f50d5d1f070
+> Stack loc for regs 0x7f50d5d1f060
+> loc attempting to write to for ra 0x7f50d5d1f060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d5d1f068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d5d1f060
+> Add at rbp loc 0x7f50d5d1f070
+> rbp to become rsp 0x7f50d5d1f060
+> Admitted thread 0x20f50b0
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d4d1e000
+> Top of stack 0x7f50d551e070
+> Stack loc for regs 0x7f50d551e060
+> loc attempting to write to for ra 0x7f50d551e060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d551e068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d551e060
+> Add at rbp loc 0x7f50d551e070
+> rbp to become rsp 0x7f50d551e060
+> Admitted thread 0x20f50d0
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d451d000
+> Top of stack 0x7f50d4d1d070
+> Stack loc for regs 0x7f50d4d1d060
+> loc attempting to write to for ra 0x7f50d4d1d060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d4d1d068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d4d1d060
+> Add at rbp loc 0x7f50d4d1d070
+> rbp to become rsp 0x7f50d4d1d060
+> Admitted thread 0x20f50f0
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d3d1c000
+> Top of stack 0x7f50d451c070
+> Stack loc for regs 0x7f50d451c060
+> loc attempting to write to for ra 0x7f50d451c060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d451c068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d451c060
+> Add at rbp loc 0x7f50d451c070
+> rbp to become rsp 0x7f50d451c060
+> Admitted thread 0x20f5110
+> In Admitted: Head 0x20f5010
+> Stack base at 0x7f50d351b000
+> Top of stack 0x7f50d3d1b070
+> Stack loc for regs 0x7f50d3d1b060
+> loc attempting to write to for ra 0x7f50d3d1b060
+> Add of wrap 0x7f50d88f42ce
+> RA loc 0x7f50d3d1b068
+> Add at ra loc 0x7f50d88f42ce
+> rbp loc 0x7f50d3d1b060
+> Add at rbp loc 0x7f50d3d1b070
+> rbp to become rsp 0x7f50d3d1b060
+> Admitted thread 0x20f5130
+> In Admitted: Head 0x20f5010
+> Admitted thread 0x20f5150
+> In Admitted: Head 0x20f5010
+> In Next: Head 0x20f5010
+> New Head (nil)
+> Child process (16725) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 16: Lwp spawns another then exits 100 times.
@@ -750,13 +1911,35 @@ Bye
 ----------
 Submitted:
 ----------
-Child process (7162) exited due to signal (Segmentation fault).
+Stack base at 0x7f699cbad000
+Top of stack 0x7f699d3ad070
+Stack loc for regs 0x7f699d3ad060
+loc attempting to write to for ra 0x7f699d3ad060
+Add of wrap 0x7f699d77d2ce
+RA loc 0x7f699d3ad068
+Add at ra loc 0x7f699d77d2ce
+rbp loc 0x7f699d3ad060
+Add at rbp loc 0x7f699d3ad070
+rbp to become rsp 0x7f699d3ad060
+Admitted thread 0x2085010
+In Admitted: Head 0x2085010
+Admitted thread 0x2085030
+In Admitted: Head 0x2085010
+Next 0x2085030
+In Next: Head 0x2085010
+Next 0x2085030
+New Head 0x2085030
+Next 0x2085010
+Add of next thread 0x2085010
+Calling Thread 0x2085030
+Next Thread 0x2085010
+Child process (16764) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,101c1
+1,101c1,23
 < 100
 < 99
 < 98
@@ -859,7 +2042,29 @@ Differences (< reference > output)
 < 1
 < Bye
 ---
-> Child process (7162) exited due to signal (Segmentation fault).
+> Stack base at 0x7f699cbad000
+> Top of stack 0x7f699d3ad070
+> Stack loc for regs 0x7f699d3ad060
+> loc attempting to write to for ra 0x7f699d3ad060
+> Add of wrap 0x7f699d77d2ce
+> RA loc 0x7f699d3ad068
+> Add at ra loc 0x7f699d77d2ce
+> rbp loc 0x7f699d3ad060
+> Add at rbp loc 0x7f699d3ad070
+> rbp to become rsp 0x7f699d3ad060
+> Admitted thread 0x2085010
+> In Admitted: Head 0x2085010
+> Admitted thread 0x2085030
+> In Admitted: Head 0x2085010
+> Next 0x2085030
+> In Next: Head 0x2085010
+> Next 0x2085030
+> New Head 0x2085030
+> Next 0x2085010
+> Add of next thread 0x2085010
+> Calling Thread 0x2085030
+> Next Thread 0x2085010
+> Child process (16764) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 17: Two Lwps. spawn then exits 50 times.
@@ -976,13 +2181,51 @@ Bye
 ----------
 Submitted:
 ----------
-Child process (7194) exited due to signal (Segmentation fault).
+Stack base at 0x7f4af07d1000
+Top of stack 0x7f4af0fd1070
+Stack loc for regs 0x7f4af0fd1060
+loc attempting to write to for ra 0x7f4af0fd1060
+Add of wrap 0x7f4af13a12ce
+RA loc 0x7f4af0fd1068
+Add at ra loc 0x7f4af13a12ce
+rbp loc 0x7f4af0fd1060
+Add at rbp loc 0x7f4af0fd1070
+rbp to become rsp 0x7f4af0fd1060
+Admitted thread 0x147e010
+In Admitted: Head 0x147e010
+Stack base at 0x7f4aeffd0000
+Top of stack 0x7f4af07d0070
+Stack loc for regs 0x7f4af07d0060
+loc attempting to write to for ra 0x7f4af07d0060
+Add of wrap 0x7f4af13a12ce
+RA loc 0x7f4af07d0068
+Add at ra loc 0x7f4af13a12ce
+rbp loc 0x7f4af07d0060
+Add at rbp loc 0x7f4af07d0070
+rbp to become rsp 0x7f4af07d0060
+Admitted thread 0x147e030
+In Admitted: Head 0x147e010
+Next 0x147e030
+Admitted thread 0x147e050
+In Admitted: Head 0x147e010
+Next 0x147e030
+Next 0x147e050
+In Next: Head 0x147e010
+Next 0x147e030
+Next 0x147e050
+New Head 0x147e030
+Next 0x147e050
+Next 0x147e010
+Add of next thread 0x147e010
+Calling Thread 0x147e050
+Next Thread 0x147e010
+Child process (16797) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,102c1
+1,102c1,39
 < Counter is 50.  Exiting
 < Counter is 50.  Exiting
 < Counter is 49.  Exiting
@@ -1086,7 +2329,45 @@ Differences (< reference > output)
 < Bye
 < Bye
 ---
-> Child process (7194) exited due to signal (Segmentation fault).
+> Stack base at 0x7f4af07d1000
+> Top of stack 0x7f4af0fd1070
+> Stack loc for regs 0x7f4af0fd1060
+> loc attempting to write to for ra 0x7f4af0fd1060
+> Add of wrap 0x7f4af13a12ce
+> RA loc 0x7f4af0fd1068
+> Add at ra loc 0x7f4af13a12ce
+> rbp loc 0x7f4af0fd1060
+> Add at rbp loc 0x7f4af0fd1070
+> rbp to become rsp 0x7f4af0fd1060
+> Admitted thread 0x147e010
+> In Admitted: Head 0x147e010
+> Stack base at 0x7f4aeffd0000
+> Top of stack 0x7f4af07d0070
+> Stack loc for regs 0x7f4af07d0060
+> loc attempting to write to for ra 0x7f4af07d0060
+> Add of wrap 0x7f4af13a12ce
+> RA loc 0x7f4af07d0068
+> Add at ra loc 0x7f4af13a12ce
+> rbp loc 0x7f4af07d0060
+> Add at rbp loc 0x7f4af07d0070
+> rbp to become rsp 0x7f4af07d0060
+> Admitted thread 0x147e030
+> In Admitted: Head 0x147e010
+> Next 0x147e030
+> Admitted thread 0x147e050
+> In Admitted: Head 0x147e010
+> Next 0x147e030
+> Next 0x147e050
+> In Next: Head 0x147e010
+> Next 0x147e030
+> Next 0x147e050
+> New Head 0x147e030
+> Next 0x147e050
+> Next 0x147e010
+> Add of next thread 0x147e010
+> Calling Thread 0x147e050
+> Next Thread 0x147e010
+> Child process (16797) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 18: 1024 threads, random exit.
@@ -1105,17 +2386,285 @@ Done.  Count is 50000. (Yielded 406869 times)
 ----------
 Submitted:
 ----------
-Child process (7226) exited due to signal (Segmentation fault).
+Stack base at 0x7f70191b8000
+Top of stack 0x7f70199b8070
+Stack loc for regs 0x7f70199b8060
+loc attempting to write to for ra 0x7f70199b8060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70199b8068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70199b8060
+Add at rbp loc 0x7f70199b8070
+rbp to become rsp 0x7f70199b8060
+Admitted thread 0x1484010
+In Admitted: Head 0x1484010
+Stack base at 0x7f70189b7000
+Top of stack 0x7f70191b7070
+Stack loc for regs 0x7f70191b7060
+loc attempting to write to for ra 0x7f70191b7060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70191b7068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70191b7060
+Add at rbp loc 0x7f70191b7070
+rbp to become rsp 0x7f70191b7060
+Admitted thread 0x1484030
+In Admitted: Head 0x1484010
+Next 0x1484030
+Stack base at 0x7f70181b6000
+Top of stack 0x7f70189b6070
+Stack loc for regs 0x7f70189b6060
+loc attempting to write to for ra 0x7f70189b6060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70189b6068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70189b6060
+Add at rbp loc 0x7f70189b6070
+rbp to become rsp 0x7f70189b6060
+Admitted thread 0x1484050
+In Admitted: Head 0x1484010
+Stack base at 0x7f70179b5000
+Top of stack 0x7f70181b5070
+Stack loc for regs 0x7f70181b5060
+loc attempting to write to for ra 0x7f70181b5060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70181b5068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70181b5060
+Add at rbp loc 0x7f70181b5070
+rbp to become rsp 0x7f70181b5060
+Admitted thread 0x1484070
+In Admitted: Head 0x1484010
+Stack base at 0x7f70171b4000
+Top of stack 0x7f70179b4070
+Stack loc for regs 0x7f70179b4060
+loc attempting to write to for ra 0x7f70179b4060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70179b4068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70179b4060
+Add at rbp loc 0x7f70179b4070
+rbp to become rsp 0x7f70179b4060
+Admitted thread 0x1484090
+In Admitted: Head 0x1484010
+Stack base at 0x7f70169b3000
+Top of stack 0x7f70171b3070
+Stack loc for regs 0x7f70171b3060
+loc attempting to write to for ra 0x7f70171b3060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70171b3068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70171b3060
+Add at rbp loc 0x7f70171b3070
+rbp to become rsp 0x7f70171b3060
+Admitted thread 0x14840b0
+In Admitted: Head 0x1484010
+Stack base at 0x7f70161b2000
+Top of stack 0x7f70169b2070
+Stack loc for regs 0x7f70169b2060
+loc attempting to write to for ra 0x7f70169b2060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70169b2068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70169b2060
+Add at rbp loc 0x7f70169b2070
+rbp to become rsp 0x7f70169b2060
+Admitted thread 0x14840d0
+In Admitted: Head 0x1484010
+Stack base at 0x7f70159b1000
+Top of stack 0x7f70161b1070
+Stack loc for regs 0x7f70161b1060
+loc attempting to write to for ra 0x7f70161b1060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70161b1068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70161b1060
+Add at rbp loc 0x7f70161b1070
+rbp to become rsp 0x7f70161b1060
+Admitted thread 0x14840f0
+In Admitted: Head 0x1484010
+Stack base at 0x7f70151b0000
+Top of stack 0x7f70159b0070
+Stack loc for regs 0x7f70159b0060
+loc attempting to write to for ra 0x7f70159b0060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70159b0068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70159b0060
+Add at rbp loc 0x7f70159b0070
+rbp to become rsp 0x7f70159b0060
+Admitted thread 0x1484110
+In Admitted: Head 0x1484010
+Stack base at 0x7f70149af000
+Top of stack 0x7f70151af070
+Stack loc for regs 0x7f70151af060
+loc attempting to write to for ra 0x7f70151af060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70151af068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70151af060
+Add at rbp loc 0x7f70151af070
+rbp to become rsp 0x7f70151af060
+Admitted thread 0x1484130
+In Admitted: Head 0x1484010
+Stack base at 0x7f70141ae000
+Top of stack 0x7f70149ae070
+Stack loc for regs 0x7f70149ae060
+loc attempting to write to for ra 0x7f70149ae060
+Add of wrap 0x7f7019d882ce
+RA loc 0x7f70149ae068
+Add at ra loc 0x7f7019d882ce
+rbp loc 0x7f70149ae060
+Add at rbp loc 0x7f70149ae070
+rbp to become rsp 0x7f70149ae060
+Admitted thread 0x1484150
+In Admitted: Head 0x1484010
+Next 0xff00000000ff
+Child process (16831) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,2c1
+1,2c1,135
 < Spawining 4096 threads.
 < Done.  Count is 50000. (Yielded 406869 times)
 ---
-> Child process (7226) exited due to signal (Segmentation fault).
+> Stack base at 0x7f70191b8000
+> Top of stack 0x7f70199b8070
+> Stack loc for regs 0x7f70199b8060
+> loc attempting to write to for ra 0x7f70199b8060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70199b8068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70199b8060
+> Add at rbp loc 0x7f70199b8070
+> rbp to become rsp 0x7f70199b8060
+> Admitted thread 0x1484010
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70189b7000
+> Top of stack 0x7f70191b7070
+> Stack loc for regs 0x7f70191b7060
+> loc attempting to write to for ra 0x7f70191b7060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70191b7068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70191b7060
+> Add at rbp loc 0x7f70191b7070
+> rbp to become rsp 0x7f70191b7060
+> Admitted thread 0x1484030
+> In Admitted: Head 0x1484010
+> Next 0x1484030
+> Stack base at 0x7f70181b6000
+> Top of stack 0x7f70189b6070
+> Stack loc for regs 0x7f70189b6060
+> loc attempting to write to for ra 0x7f70189b6060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70189b6068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70189b6060
+> Add at rbp loc 0x7f70189b6070
+> rbp to become rsp 0x7f70189b6060
+> Admitted thread 0x1484050
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70179b5000
+> Top of stack 0x7f70181b5070
+> Stack loc for regs 0x7f70181b5060
+> loc attempting to write to for ra 0x7f70181b5060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70181b5068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70181b5060
+> Add at rbp loc 0x7f70181b5070
+> rbp to become rsp 0x7f70181b5060
+> Admitted thread 0x1484070
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70171b4000
+> Top of stack 0x7f70179b4070
+> Stack loc for regs 0x7f70179b4060
+> loc attempting to write to for ra 0x7f70179b4060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70179b4068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70179b4060
+> Add at rbp loc 0x7f70179b4070
+> rbp to become rsp 0x7f70179b4060
+> Admitted thread 0x1484090
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70169b3000
+> Top of stack 0x7f70171b3070
+> Stack loc for regs 0x7f70171b3060
+> loc attempting to write to for ra 0x7f70171b3060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70171b3068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70171b3060
+> Add at rbp loc 0x7f70171b3070
+> rbp to become rsp 0x7f70171b3060
+> Admitted thread 0x14840b0
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70161b2000
+> Top of stack 0x7f70169b2070
+> Stack loc for regs 0x7f70169b2060
+> loc attempting to write to for ra 0x7f70169b2060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70169b2068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70169b2060
+> Add at rbp loc 0x7f70169b2070
+> rbp to become rsp 0x7f70169b2060
+> Admitted thread 0x14840d0
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70159b1000
+> Top of stack 0x7f70161b1070
+> Stack loc for regs 0x7f70161b1060
+> loc attempting to write to for ra 0x7f70161b1060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70161b1068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70161b1060
+> Add at rbp loc 0x7f70161b1070
+> rbp to become rsp 0x7f70161b1060
+> Admitted thread 0x14840f0
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70151b0000
+> Top of stack 0x7f70159b0070
+> Stack loc for regs 0x7f70159b0060
+> loc attempting to write to for ra 0x7f70159b0060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70159b0068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70159b0060
+> Add at rbp loc 0x7f70159b0070
+> rbp to become rsp 0x7f70159b0060
+> Admitted thread 0x1484110
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70149af000
+> Top of stack 0x7f70151af070
+> Stack loc for regs 0x7f70151af060
+> loc attempting to write to for ra 0x7f70151af060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70151af068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70151af060
+> Add at rbp loc 0x7f70151af070
+> rbp to become rsp 0x7f70151af060
+> Admitted thread 0x1484130
+> In Admitted: Head 0x1484010
+> Stack base at 0x7f70141ae000
+> Top of stack 0x7f70149ae070
+> Stack loc for regs 0x7f70149ae060
+> loc attempting to write to for ra 0x7f70149ae060
+> Add of wrap 0x7f7019d882ce
+> RA loc 0x7f70149ae068
+> Add at ra loc 0x7f7019d882ce
+> rbp loc 0x7f70149ae060
+> Add at rbp loc 0x7f70149ae070
+> rbp to become rsp 0x7f70149ae060
+> Admitted thread 0x1484150
+> In Admitted: Head 0x1484010
+> Next 0xff00000000ff
+> Child process (16831) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 19: Ping pong with semaphores
@@ -1154,13 +2703,33 @@ Done.
 ----------
 Submitted:
 ----------
-Child process (7258) exited due to signal (Segmentation fault).
+Stack base at 0x7f6b4e740000
+Top of stack 0x7f6b4ef40070
+Stack loc for regs 0x7f6b4ef40060
+loc attempting to write to for ra 0x7f6b4ef40060
+Add of wrap 0x7f6b4f3102ce
+RA loc 0x7f6b4ef40068
+Add at ra loc 0x7f6b4f3102ce
+rbp loc 0x7f6b4ef40060
+Add at rbp loc 0x7f6b4ef40070
+rbp to become rsp 0x7f6b4ef40060
+Stack base at 0x7f6b4df3f000
+Top of stack 0x7f6b4e73f070
+Stack loc for regs 0x7f6b4e73f060
+loc attempting to write to for ra 0x7f6b4e73f060
+Add of wrap 0x7f6b4f3102ce
+RA loc 0x7f6b4e73f068
+Add at ra loc 0x7f6b4f3102ce
+rbp loc 0x7f6b4e73f060
+Add at rbp loc 0x7f6b4e73f070
+rbp to become rsp 0x7f6b4e73f060
+Child process (16863) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,22c1
+1,22c1,21
 < Spawining threads. (20)
 <    Ping...pong.
 <    Ping...pong.
@@ -1184,7 +2753,27 @@ Differences (< reference > output)
 <    Ping...pong.
 < Done.
 ---
-> Child process (7258) exited due to signal (Segmentation fault).
+> Stack base at 0x7f6b4e740000
+> Top of stack 0x7f6b4ef40070
+> Stack loc for regs 0x7f6b4ef40060
+> loc attempting to write to for ra 0x7f6b4ef40060
+> Add of wrap 0x7f6b4f3102ce
+> RA loc 0x7f6b4ef40068
+> Add at ra loc 0x7f6b4f3102ce
+> rbp loc 0x7f6b4ef40060
+> Add at rbp loc 0x7f6b4ef40070
+> rbp to become rsp 0x7f6b4ef40060
+> Stack base at 0x7f6b4df3f000
+> Top of stack 0x7f6b4e73f070
+> Stack loc for regs 0x7f6b4e73f060
+> loc attempting to write to for ra 0x7f6b4e73f060
+> Add of wrap 0x7f6b4f3102ce
+> RA loc 0x7f6b4e73f068
+> Add at ra loc 0x7f6b4f3102ce
+> rbp loc 0x7f6b4e73f060
+> Add at rbp loc 0x7f6b4e73f070
+> rbp to become rsp 0x7f6b4e73f060
+> Child process (16863) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 20: Dine with semaphores
@@ -1406,13 +2995,33 @@ Reference:
 ----------
 Submitted:
 ----------
-Child process (7290) exited due to signal (Segmentation fault).
+Stack base at 0x7f36714b1000
+Top of stack 0x7f3671cb1070
+Stack loc for regs 0x7f3671cb1060
+loc attempting to write to for ra 0x7f3671cb1060
+Add of wrap 0x7f36720812ce
+RA loc 0x7f3671cb1068
+Add at ra loc 0x7f36720812ce
+rbp loc 0x7f3671cb1060
+Add at rbp loc 0x7f3671cb1070
+rbp to become rsp 0x7f3671cb1060
+Stack base at 0x7f3670cb0000
+Top of stack 0x7f36714b0070
+Stack loc for regs 0x7f36714b0060
+loc attempting to write to for ra 0x7f36714b0060
+Add of wrap 0x7f36720812ce
+RA loc 0x7f36714b0068
+Add at ra loc 0x7f36720812ce
+rbp loc 0x7f36714b0060
+Add at rbp loc 0x7f36714b0070
+rbp to become rsp 0x7f36714b0060
+Child process (16897) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,205c1
+1,205c1,21
 < |=============|=============|=============|=============|=============|
 < |      A      |      B      |      C      |      D      |      E      |
 < |=============|=============|=============|=============|=============|
@@ -1619,7 +3228,27 @@ Differences (< reference > output)
 < | -----       | -----       | -----       | -----       | -----       |
 < |=============|=============|=============|=============|=============|
 ---
-> Child process (7290) exited due to signal (Segmentation fault).
+> Stack base at 0x7f36714b1000
+> Top of stack 0x7f3671cb1070
+> Stack loc for regs 0x7f3671cb1060
+> loc attempting to write to for ra 0x7f3671cb1060
+> Add of wrap 0x7f36720812ce
+> RA loc 0x7f3671cb1068
+> Add at ra loc 0x7f36720812ce
+> rbp loc 0x7f3671cb1060
+> Add at rbp loc 0x7f3671cb1070
+> rbp to become rsp 0x7f3671cb1060
+> Stack base at 0x7f3670cb0000
+> Top of stack 0x7f36714b0070
+> Stack loc for regs 0x7f36714b0060
+> loc attempting to write to for ra 0x7f36714b0060
+> Add of wrap 0x7f36720812ce
+> RA loc 0x7f36714b0068
+> Add at ra loc 0x7f36720812ce
+> rbp loc 0x7f36714b0060
+> Add at rbp loc 0x7f36714b0070
+> rbp to become rsp 0x7f36714b0060
+> Child process (16897) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 21: Transfer threads between schedulers (stopped)
@@ -1656,13 +3285,76 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (7322) exited due to signal (Segmentation fault).
+Stack base at 0x7fb8b315b000
+Top of stack 0x7fb8b395b070
+Stack loc for regs 0x7fb8b395b060
+loc attempting to write to for ra 0x7fb8b395b060
+Add of wrap 0x7fb8b3d2b2ce
+RA loc 0x7fb8b395b068
+Add at ra loc 0x7fb8b3d2b2ce
+rbp loc 0x7fb8b395b060
+Add at rbp loc 0x7fb8b395b070
+rbp to become rsp 0x7fb8b395b060
+Admitted thread 0x112b010
+In Admitted: Head 0x112b010
+Stack base at 0x7fb8b295a000
+Top of stack 0x7fb8b315a070
+Stack loc for regs 0x7fb8b315a060
+loc attempting to write to for ra 0x7fb8b315a060
+Add of wrap 0x7fb8b3d2b2ce
+RA loc 0x7fb8b315a068
+Add at ra loc 0x7fb8b3d2b2ce
+rbp loc 0x7fb8b315a060
+Add at rbp loc 0x7fb8b315a070
+rbp to become rsp 0x7fb8b315a060
+Admitted thread 0x112b030
+In Admitted: Head 0x112b010
+Next 0x112b030
+Stack base at 0x7fb8b2159000
+Top of stack 0x7fb8b2959070
+Stack loc for regs 0x7fb8b2959060
+loc attempting to write to for ra 0x7fb8b2959060
+Add of wrap 0x7fb8b3d2b2ce
+RA loc 0x7fb8b2959068
+Add at ra loc 0x7fb8b3d2b2ce
+rbp loc 0x7fb8b2959060
+Add at rbp loc 0x7fb8b2959070
+rbp to become rsp 0x7fb8b2959060
+Admitted thread 0x112b050
+In Admitted: Head 0x112b010
+Stack base at 0x7fb8b1958000
+Top of stack 0x7fb8b2158070
+Stack loc for regs 0x7fb8b2158060
+loc attempting to write to for ra 0x7fb8b2158060
+Add of wrap 0x7fb8b3d2b2ce
+RA loc 0x7fb8b2158068
+Add at ra loc 0x7fb8b3d2b2ce
+rbp loc 0x7fb8b2158060
+Add at rbp loc 0x7fb8b2158070
+rbp to become rsp 0x7fb8b2158060
+Admitted thread 0x112b070
+In Admitted: Head 0x112b010
+Stack base at 0x7fb8b1157000
+Top of stack 0x7fb8b1957070
+Stack loc for regs 0x7fb8b1957060
+loc attempting to write to for ra 0x7fb8b1957060
+Add of wrap 0x7fb8b3d2b2ce
+RA loc 0x7fb8b1957068
+Add at ra loc 0x7fb8b3d2b2ce
+rbp loc 0x7fb8b1957060
+Add at rbp loc 0x7fb8b1957070
+rbp to become rsp 0x7fb8b1957060
+Admitted thread 0x112b090
+In Admitted: Head 0x112b010
+In Next: Head 0x112b010
+New Head (nil)
+Child process (16930) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,19c1
+1,19c1,64
 < Creating LWPS
 < Setting the scheduler.
 < Launching LWPS
@@ -1683,7 +3375,70 @@ Differences (< reference > output)
 <                         5
 < Back from LWPS.
 ---
-> Child process (7322) exited due to signal (Segmentation fault).
+> Stack base at 0x7fb8b315b000
+> Top of stack 0x7fb8b395b070
+> Stack loc for regs 0x7fb8b395b060
+> loc attempting to write to for ra 0x7fb8b395b060
+> Add of wrap 0x7fb8b3d2b2ce
+> RA loc 0x7fb8b395b068
+> Add at ra loc 0x7fb8b3d2b2ce
+> rbp loc 0x7fb8b395b060
+> Add at rbp loc 0x7fb8b395b070
+> rbp to become rsp 0x7fb8b395b060
+> Admitted thread 0x112b010
+> In Admitted: Head 0x112b010
+> Stack base at 0x7fb8b295a000
+> Top of stack 0x7fb8b315a070
+> Stack loc for regs 0x7fb8b315a060
+> loc attempting to write to for ra 0x7fb8b315a060
+> Add of wrap 0x7fb8b3d2b2ce
+> RA loc 0x7fb8b315a068
+> Add at ra loc 0x7fb8b3d2b2ce
+> rbp loc 0x7fb8b315a060
+> Add at rbp loc 0x7fb8b315a070
+> rbp to become rsp 0x7fb8b315a060
+> Admitted thread 0x112b030
+> In Admitted: Head 0x112b010
+> Next 0x112b030
+> Stack base at 0x7fb8b2159000
+> Top of stack 0x7fb8b2959070
+> Stack loc for regs 0x7fb8b2959060
+> loc attempting to write to for ra 0x7fb8b2959060
+> Add of wrap 0x7fb8b3d2b2ce
+> RA loc 0x7fb8b2959068
+> Add at ra loc 0x7fb8b3d2b2ce
+> rbp loc 0x7fb8b2959060
+> Add at rbp loc 0x7fb8b2959070
+> rbp to become rsp 0x7fb8b2959060
+> Admitted thread 0x112b050
+> In Admitted: Head 0x112b010
+> Stack base at 0x7fb8b1958000
+> Top of stack 0x7fb8b2158070
+> Stack loc for regs 0x7fb8b2158060
+> loc attempting to write to for ra 0x7fb8b2158060
+> Add of wrap 0x7fb8b3d2b2ce
+> RA loc 0x7fb8b2158068
+> Add at ra loc 0x7fb8b3d2b2ce
+> rbp loc 0x7fb8b2158060
+> Add at rbp loc 0x7fb8b2158070
+> rbp to become rsp 0x7fb8b2158060
+> Admitted thread 0x112b070
+> In Admitted: Head 0x112b010
+> Stack base at 0x7fb8b1157000
+> Top of stack 0x7fb8b1957070
+> Stack loc for regs 0x7fb8b1957060
+> loc attempting to write to for ra 0x7fb8b1957060
+> Add of wrap 0x7fb8b3d2b2ce
+> RA loc 0x7fb8b1957068
+> Add at ra loc 0x7fb8b3d2b2ce
+> rbp loc 0x7fb8b1957060
+> Add at rbp loc 0x7fb8b1957070
+> rbp to become rsp 0x7fb8b1957060
+> Admitted thread 0x112b090
+> In Admitted: Head 0x112b010
+> In Next: Head 0x112b010
+> New Head (nil)
+> Child process (16930) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 22: Transfer threads between schedulers (live)
@@ -1735,13 +3490,78 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (7354) exited due to signal (Segmentation fault).
+Stack base at 0x7fe7a6c7d000
+Top of stack 0x7fe7a747d070
+Stack loc for regs 0x7fe7a747d060
+loc attempting to write to for ra 0x7fe7a747d060
+Add of wrap 0x7fe7a784d2ce
+RA loc 0x7fe7a747d068
+Add at ra loc 0x7fe7a784d2ce
+rbp loc 0x7fe7a747d060
+Add at rbp loc 0x7fe7a747d070
+rbp to become rsp 0x7fe7a747d060
+Admitted thread 0xf47010
+In Admitted: Head 0xf47010
+Stack base at 0x7fe7a647c000
+Top of stack 0x7fe7a6c7c070
+Stack loc for regs 0x7fe7a6c7c060
+loc attempting to write to for ra 0x7fe7a6c7c060
+Add of wrap 0x7fe7a784d2ce
+RA loc 0x7fe7a6c7c068
+Add at ra loc 0x7fe7a784d2ce
+rbp loc 0x7fe7a6c7c060
+Add at rbp loc 0x7fe7a6c7c070
+rbp to become rsp 0x7fe7a6c7c060
+Admitted thread 0xf47030
+In Admitted: Head 0xf47010
+Next 0xf47030
+Stack base at 0x7fe7a5c7b000
+Top of stack 0x7fe7a647b070
+Stack loc for regs 0x7fe7a647b060
+loc attempting to write to for ra 0x7fe7a647b060
+Add of wrap 0x7fe7a784d2ce
+RA loc 0x7fe7a647b068
+Add at ra loc 0x7fe7a784d2ce
+rbp loc 0x7fe7a647b060
+Add at rbp loc 0x7fe7a647b070
+rbp to become rsp 0x7fe7a647b060
+Admitted thread 0xf47050
+In Admitted: Head 0xf47010
+Stack base at 0x7fe7a547a000
+Top of stack 0x7fe7a5c7a070
+Stack loc for regs 0x7fe7a5c7a060
+loc attempting to write to for ra 0x7fe7a5c7a060
+Add of wrap 0x7fe7a784d2ce
+RA loc 0x7fe7a5c7a068
+Add at ra loc 0x7fe7a784d2ce
+rbp loc 0x7fe7a5c7a060
+Add at rbp loc 0x7fe7a5c7a070
+rbp to become rsp 0x7fe7a5c7a060
+Admitted thread 0xf47070
+In Admitted: Head 0xf47010
+Stack base at 0x7fe7a4c79000
+Top of stack 0x7fe7a5479070
+Stack loc for regs 0x7fe7a5479060
+loc attempting to write to for ra 0x7fe7a5479060
+Add of wrap 0x7fe7a784d2ce
+RA loc 0x7fe7a5479068
+Add at ra loc 0x7fe7a784d2ce
+rbp loc 0x7fe7a5479060
+Add at rbp loc 0x7fe7a5479070
+rbp to become rsp 0x7fe7a5479060
+Admitted thread 0xf47090
+In Admitted: Head 0xf47010
+Admitted thread 0xf470b0
+In Admitted: Head 0xf47010
+In Next: Head 0xf47010
+New Head (nil)
+Child process (16962) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,34c1
+1,34c1,66
 < Creating LWPS
 < Launching LWPS
 <     1
@@ -1777,7 +3597,72 @@ Differences (< reference > output)
 <                         5
 < Back from LWPS.
 ---
-> Child process (7354) exited due to signal (Segmentation fault).
+> Stack base at 0x7fe7a6c7d000
+> Top of stack 0x7fe7a747d070
+> Stack loc for regs 0x7fe7a747d060
+> loc attempting to write to for ra 0x7fe7a747d060
+> Add of wrap 0x7fe7a784d2ce
+> RA loc 0x7fe7a747d068
+> Add at ra loc 0x7fe7a784d2ce
+> rbp loc 0x7fe7a747d060
+> Add at rbp loc 0x7fe7a747d070
+> rbp to become rsp 0x7fe7a747d060
+> Admitted thread 0xf47010
+> In Admitted: Head 0xf47010
+> Stack base at 0x7fe7a647c000
+> Top of stack 0x7fe7a6c7c070
+> Stack loc for regs 0x7fe7a6c7c060
+> loc attempting to write to for ra 0x7fe7a6c7c060
+> Add of wrap 0x7fe7a784d2ce
+> RA loc 0x7fe7a6c7c068
+> Add at ra loc 0x7fe7a784d2ce
+> rbp loc 0x7fe7a6c7c060
+> Add at rbp loc 0x7fe7a6c7c070
+> rbp to become rsp 0x7fe7a6c7c060
+> Admitted thread 0xf47030
+> In Admitted: Head 0xf47010
+> Next 0xf47030
+> Stack base at 0x7fe7a5c7b000
+> Top of stack 0x7fe7a647b070
+> Stack loc for regs 0x7fe7a647b060
+> loc attempting to write to for ra 0x7fe7a647b060
+> Add of wrap 0x7fe7a784d2ce
+> RA loc 0x7fe7a647b068
+> Add at ra loc 0x7fe7a784d2ce
+> rbp loc 0x7fe7a647b060
+> Add at rbp loc 0x7fe7a647b070
+> rbp to become rsp 0x7fe7a647b060
+> Admitted thread 0xf47050
+> In Admitted: Head 0xf47010
+> Stack base at 0x7fe7a547a000
+> Top of stack 0x7fe7a5c7a070
+> Stack loc for regs 0x7fe7a5c7a060
+> loc attempting to write to for ra 0x7fe7a5c7a060
+> Add of wrap 0x7fe7a784d2ce
+> RA loc 0x7fe7a5c7a068
+> Add at ra loc 0x7fe7a784d2ce
+> rbp loc 0x7fe7a5c7a060
+> Add at rbp loc 0x7fe7a5c7a070
+> rbp to become rsp 0x7fe7a5c7a060
+> Admitted thread 0xf47070
+> In Admitted: Head 0xf47010
+> Stack base at 0x7fe7a4c79000
+> Top of stack 0x7fe7a5479070
+> Stack loc for regs 0x7fe7a5479060
+> loc attempting to write to for ra 0x7fe7a5479060
+> Add of wrap 0x7fe7a784d2ce
+> RA loc 0x7fe7a5479068
+> Add at ra loc 0x7fe7a784d2ce
+> rbp loc 0x7fe7a5479060
+> Add at rbp loc 0x7fe7a5479070
+> rbp to become rsp 0x7fe7a5479060
+> Admitted thread 0xf47090
+> In Admitted: Head 0xf47010
+> Admitted thread 0xf470b0
+> In Admitted: Head 0xf47010
+> In Next: Head 0xf47010
+> New Head (nil)
+> Child process (16962) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 23: Transfer threads to same scheduler (live)
@@ -1831,13 +3716,33 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (7386) exited due to signal (Segmentation fault).
+Stack base at 0x7ff9c628e000
+Top of stack 0x7ff9c6a8e070
+Stack loc for regs 0x7ff9c6a8e060
+loc attempting to write to for ra 0x7ff9c6a8e060
+Add of wrap 0x7ff9c6e5e2ce
+RA loc 0x7ff9c6a8e068
+Add at ra loc 0x7ff9c6e5e2ce
+rbp loc 0x7ff9c6a8e060
+Add at rbp loc 0x7ff9c6a8e070
+rbp to become rsp 0x7ff9c6a8e060
+Stack base at 0x7ff9c5a8d000
+Top of stack 0x7ff9c628d070
+Stack loc for regs 0x7ff9c628d060
+loc attempting to write to for ra 0x7ff9c628d060
+Add of wrap 0x7ff9c6e5e2ce
+RA loc 0x7ff9c628d068
+Add at ra loc 0x7ff9c6e5e2ce
+rbp loc 0x7ff9c628d060
+Add at rbp loc 0x7ff9c628d070
+rbp to become rsp 0x7ff9c628d060
+Child process (16994) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,35c1
+1,35c1,21
 < Setting Scheduler
 < Creating LWPS
 < Launching LWPS
@@ -1874,7 +3779,27 @@ Differences (< reference > output)
 <                         5
 < Back from LWPS.
 ---
-> Child process (7386) exited due to signal (Segmentation fault).
+> Stack base at 0x7ff9c628e000
+> Top of stack 0x7ff9c6a8e070
+> Stack loc for regs 0x7ff9c6a8e060
+> loc attempting to write to for ra 0x7ff9c6a8e060
+> Add of wrap 0x7ff9c6e5e2ce
+> RA loc 0x7ff9c6a8e068
+> Add at ra loc 0x7ff9c6e5e2ce
+> rbp loc 0x7ff9c6a8e060
+> Add at rbp loc 0x7ff9c6a8e070
+> rbp to become rsp 0x7ff9c6a8e060
+> Stack base at 0x7ff9c5a8d000
+> Top of stack 0x7ff9c628d070
+> Stack loc for regs 0x7ff9c628d060
+> loc attempting to write to for ra 0x7ff9c628d060
+> Add of wrap 0x7ff9c6e5e2ce
+> RA loc 0x7ff9c628d068
+> Add at ra loc 0x7ff9c6e5e2ce
+> rbp loc 0x7ff9c628d060
+> Add at rbp loc 0x7ff9c628d070
+> rbp to become rsp 0x7ff9c628d060
+> Child process (16994) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 24: Transfer threads between schedulers check for init/shutdown
@@ -1998,13 +3923,33 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (7424) exited due to signal (Segmentation fault).
+Stack base at 0x7f9324ab0000
+Top of stack 0x7f93252b0070
+Stack loc for regs 0x7f93252b0060
+loc attempting to write to for ra 0x7f93252b0060
+Add of wrap 0x7f93256802ce
+RA loc 0x7f93252b0068
+Add at ra loc 0x7f93256802ce
+rbp loc 0x7f93252b0060
+Add at rbp loc 0x7f93252b0070
+rbp to become rsp 0x7f93252b0060
+Stack base at 0x7f93242af000
+Top of stack 0x7f9324aaf070
+Stack loc for regs 0x7f9324aaf060
+loc attempting to write to for ra 0x7f9324aaf060
+Add of wrap 0x7f93256802ce
+RA loc 0x7f9324aaf068
+Add at ra loc 0x7f93256802ce
+rbp loc 0x7f9324aaf060
+Add at rbp loc 0x7f9324aaf070
+rbp to become rsp 0x7f9324aaf060
+Child process (17026) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,106c1
+1,106c1,21
 < init: called on first scheduler
 < Creating LWPS
 < Admitting new thread to First scheduler
@@ -2112,7 +4057,27 @@ Differences (< reference > output)
 < (second->next())
 < Back from LWPS.
 ---
-> Child process (7424) exited due to signal (Segmentation fault).
+> Stack base at 0x7f9324ab0000
+> Top of stack 0x7f93252b0070
+> Stack loc for regs 0x7f93252b0060
+> loc attempting to write to for ra 0x7f93252b0060
+> Add of wrap 0x7f93256802ce
+> RA loc 0x7f93252b0068
+> Add at ra loc 0x7f93256802ce
+> rbp loc 0x7f93252b0060
+> Add at rbp loc 0x7f93252b0070
+> rbp to become rsp 0x7f93252b0060
+> Stack base at 0x7f93242af000
+> Top of stack 0x7f9324aaf070
+> Stack loc for regs 0x7f9324aaf060
+> loc attempting to write to for ra 0x7f9324aaf060
+> Add of wrap 0x7f93256802ce
+> RA loc 0x7f9324aaf068
+> Add at ra loc 0x7f93256802ce
+> rbp loc 0x7f9324aaf060
+> Add at rbp loc 0x7f9324aaf070
+> rbp to become rsp 0x7f9324aaf060
+> Child process (17026) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 25: Check that Returned TIDs are unique
@@ -2131,16 +4096,284 @@ Creating LWPS
 ----------
 Submitted:
 ----------
-Child process (7456) exited due to signal (Segmentation fault).
+Stack base at 0x7fb7d9147000
+Top of stack 0x7fb7d9947070
+Stack loc for regs 0x7fb7d9947060
+loc attempting to write to for ra 0x7fb7d9947060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d9947068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d9947060
+Add at rbp loc 0x7fb7d9947070
+rbp to become rsp 0x7fb7d9947060
+Admitted thread 0xba7010
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d8946000
+Top of stack 0x7fb7d9146070
+Stack loc for regs 0x7fb7d9146060
+loc attempting to write to for ra 0x7fb7d9146060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d9146068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d9146060
+Add at rbp loc 0x7fb7d9146070
+rbp to become rsp 0x7fb7d9146060
+Admitted thread 0xba7030
+In Admitted: Head 0xba7010
+Next 0xba7030
+Stack base at 0x7fb7d8145000
+Top of stack 0x7fb7d8945070
+Stack loc for regs 0x7fb7d8945060
+loc attempting to write to for ra 0x7fb7d8945060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d8945068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d8945060
+Add at rbp loc 0x7fb7d8945070
+rbp to become rsp 0x7fb7d8945060
+Admitted thread 0xba7050
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d7944000
+Top of stack 0x7fb7d8144070
+Stack loc for regs 0x7fb7d8144060
+loc attempting to write to for ra 0x7fb7d8144060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d8144068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d8144060
+Add at rbp loc 0x7fb7d8144070
+rbp to become rsp 0x7fb7d8144060
+Admitted thread 0xba7070
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d7143000
+Top of stack 0x7fb7d7943070
+Stack loc for regs 0x7fb7d7943060
+loc attempting to write to for ra 0x7fb7d7943060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d7943068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d7943060
+Add at rbp loc 0x7fb7d7943070
+rbp to become rsp 0x7fb7d7943060
+Admitted thread 0xba7090
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d6942000
+Top of stack 0x7fb7d7142070
+Stack loc for regs 0x7fb7d7142060
+loc attempting to write to for ra 0x7fb7d7142060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d7142068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d7142060
+Add at rbp loc 0x7fb7d7142070
+rbp to become rsp 0x7fb7d7142060
+Admitted thread 0xba70b0
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d6141000
+Top of stack 0x7fb7d6941070
+Stack loc for regs 0x7fb7d6941060
+loc attempting to write to for ra 0x7fb7d6941060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d6941068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d6941060
+Add at rbp loc 0x7fb7d6941070
+rbp to become rsp 0x7fb7d6941060
+Admitted thread 0xba70d0
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d5940000
+Top of stack 0x7fb7d6140070
+Stack loc for regs 0x7fb7d6140060
+loc attempting to write to for ra 0x7fb7d6140060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d6140068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d6140060
+Add at rbp loc 0x7fb7d6140070
+rbp to become rsp 0x7fb7d6140060
+Admitted thread 0xba70f0
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d513f000
+Top of stack 0x7fb7d593f070
+Stack loc for regs 0x7fb7d593f060
+loc attempting to write to for ra 0x7fb7d593f060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d593f068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d593f060
+Add at rbp loc 0x7fb7d593f070
+rbp to become rsp 0x7fb7d593f060
+Admitted thread 0xba7110
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d493e000
+Top of stack 0x7fb7d513e070
+Stack loc for regs 0x7fb7d513e060
+loc attempting to write to for ra 0x7fb7d513e060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d513e068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d513e060
+Add at rbp loc 0x7fb7d513e070
+rbp to become rsp 0x7fb7d513e060
+Admitted thread 0xba7130
+In Admitted: Head 0xba7010
+Stack base at 0x7fb7d413d000
+Top of stack 0x7fb7d493d070
+Stack loc for regs 0x7fb7d493d060
+loc attempting to write to for ra 0x7fb7d493d060
+Add of wrap 0x7fb7d9d172ce
+RA loc 0x7fb7d493d068
+Add at ra loc 0x7fb7d9d172ce
+rbp loc 0x7fb7d493d060
+Add at rbp loc 0x7fb7d493d070
+rbp to become rsp 0x7fb7d493d060
+Admitted thread 0xba7150
+In Admitted: Head 0xba7010
+Next 0xff00000000ff
+Child process (17058) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1c1
+1c1,135
 < Creating LWPS
 ---
-> Child process (7456) exited due to signal (Segmentation fault).
+> Stack base at 0x7fb7d9147000
+> Top of stack 0x7fb7d9947070
+> Stack loc for regs 0x7fb7d9947060
+> loc attempting to write to for ra 0x7fb7d9947060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d9947068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d9947060
+> Add at rbp loc 0x7fb7d9947070
+> rbp to become rsp 0x7fb7d9947060
+> Admitted thread 0xba7010
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d8946000
+> Top of stack 0x7fb7d9146070
+> Stack loc for regs 0x7fb7d9146060
+> loc attempting to write to for ra 0x7fb7d9146060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d9146068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d9146060
+> Add at rbp loc 0x7fb7d9146070
+> rbp to become rsp 0x7fb7d9146060
+> Admitted thread 0xba7030
+> In Admitted: Head 0xba7010
+> Next 0xba7030
+> Stack base at 0x7fb7d8145000
+> Top of stack 0x7fb7d8945070
+> Stack loc for regs 0x7fb7d8945060
+> loc attempting to write to for ra 0x7fb7d8945060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d8945068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d8945060
+> Add at rbp loc 0x7fb7d8945070
+> rbp to become rsp 0x7fb7d8945060
+> Admitted thread 0xba7050
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d7944000
+> Top of stack 0x7fb7d8144070
+> Stack loc for regs 0x7fb7d8144060
+> loc attempting to write to for ra 0x7fb7d8144060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d8144068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d8144060
+> Add at rbp loc 0x7fb7d8144070
+> rbp to become rsp 0x7fb7d8144060
+> Admitted thread 0xba7070
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d7143000
+> Top of stack 0x7fb7d7943070
+> Stack loc for regs 0x7fb7d7943060
+> loc attempting to write to for ra 0x7fb7d7943060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d7943068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d7943060
+> Add at rbp loc 0x7fb7d7943070
+> rbp to become rsp 0x7fb7d7943060
+> Admitted thread 0xba7090
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d6942000
+> Top of stack 0x7fb7d7142070
+> Stack loc for regs 0x7fb7d7142060
+> loc attempting to write to for ra 0x7fb7d7142060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d7142068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d7142060
+> Add at rbp loc 0x7fb7d7142070
+> rbp to become rsp 0x7fb7d7142060
+> Admitted thread 0xba70b0
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d6141000
+> Top of stack 0x7fb7d6941070
+> Stack loc for regs 0x7fb7d6941060
+> loc attempting to write to for ra 0x7fb7d6941060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d6941068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d6941060
+> Add at rbp loc 0x7fb7d6941070
+> rbp to become rsp 0x7fb7d6941060
+> Admitted thread 0xba70d0
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d5940000
+> Top of stack 0x7fb7d6140070
+> Stack loc for regs 0x7fb7d6140060
+> loc attempting to write to for ra 0x7fb7d6140060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d6140068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d6140060
+> Add at rbp loc 0x7fb7d6140070
+> rbp to become rsp 0x7fb7d6140060
+> Admitted thread 0xba70f0
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d513f000
+> Top of stack 0x7fb7d593f070
+> Stack loc for regs 0x7fb7d593f060
+> loc attempting to write to for ra 0x7fb7d593f060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d593f068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d593f060
+> Add at rbp loc 0x7fb7d593f070
+> rbp to become rsp 0x7fb7d593f060
+> Admitted thread 0xba7110
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d493e000
+> Top of stack 0x7fb7d513e070
+> Stack loc for regs 0x7fb7d513e060
+> loc attempting to write to for ra 0x7fb7d513e060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d513e068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d513e060
+> Add at rbp loc 0x7fb7d513e070
+> rbp to become rsp 0x7fb7d513e060
+> Admitted thread 0xba7130
+> In Admitted: Head 0xba7010
+> Stack base at 0x7fb7d413d000
+> Top of stack 0x7fb7d493d070
+> Stack loc for regs 0x7fb7d493d060
+> loc attempting to write to for ra 0x7fb7d493d060
+> Add of wrap 0x7fb7d9d172ce
+> RA loc 0x7fb7d493d068
+> Add at ra loc 0x7fb7d9d172ce
+> rbp loc 0x7fb7d493d060
+> Add at rbp loc 0x7fb7d493d070
+> rbp to become rsp 0x7fb7d493d060
+> Admitted thread 0xba7150
+> In Admitted: Head 0xba7010
+> Next 0xff00000000ff
+> Child process (17058) exited due to signal (Segmentation fault).
 ---------
 =================================================
 TEST 26: Does tid2thread return the right thread?
@@ -2610,13 +4843,33 @@ Checking thread IDs...
 ----------
 Submitted:
 ----------
-Child process (7494) exited due to signal (Segmentation fault).
+Stack base at 0x7ff1a55fd000
+Top of stack 0x7ff1a5dfd070
+Stack loc for regs 0x7ff1a5dfd060
+loc attempting to write to for ra 0x7ff1a5dfd060
+Add of wrap 0x7ff1a61cd2ce
+RA loc 0x7ff1a5dfd068
+Add at ra loc 0x7ff1a61cd2ce
+rbp loc 0x7ff1a5dfd060
+Add at rbp loc 0x7ff1a5dfd070
+rbp to become rsp 0x7ff1a5dfd060
+Stack base at 0x7ff1a4dfc000
+Top of stack 0x7ff1a55fc070
+Stack loc for regs 0x7ff1a55fc060
+loc attempting to write to for ra 0x7ff1a55fc060
+Add of wrap 0x7ff1a61cd2ce
+RA loc 0x7ff1a55fc068
+Add at ra loc 0x7ff1a61cd2ce
+rbp loc 0x7ff1a55fc060
+Add at rbp loc 0x7ff1a55fc070
+rbp to become rsp 0x7ff1a55fc060
+Child process (17090) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,451c1
+1,451c1,21
 < Launching LWPS
 <                    4
 <     1
@@ -3069,7 +5322,61 @@ Differences (< reference > output)
 < Checking thread IDs...
 < ...done.
 ---
-> Child process (7494) exited due to signal (Segmentation fault).
+> Stack base at 0x7ff1a55fd000
+> Top of stack 0x7ff1a5dfd070
+> Stack loc for regs 0x7ff1a5dfd060
+> loc attempting to write to for ra 0x7ff1a5dfd060
+> Add of wrap 0x7ff1a61cd2ce
+> RA loc 0x7ff1a5dfd068
+> Add at ra loc 0x7ff1a61cd2ce
+> rbp loc 0x7ff1a5dfd060
+> Add at rbp loc 0x7ff1a5dfd070
+> rbp to become rsp 0x7ff1a5dfd060
+> Stack base at 0x7ff1a4dfc000
+> Top of stack 0x7ff1a55fc070
+> Stack loc for regs 0x7ff1a55fc060
+> loc attempting to write to for ra 0x7ff1a55fc060
+> Add of wrap 0x7ff1a61cd2ce
+> RA loc 0x7ff1a55fc068
+> Add at ra loc 0x7ff1a61cd2ce
+> rbp loc 0x7ff1a55fc060
+> Add at rbp loc 0x7ff1a55fc070
+> rbp to become rsp 0x7ff1a55fc060
+> Child process (17090) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 27: Tid2thread() returns NULL given a bad tid?
+
+This launches a single thread, then calls tid2thread with 
+a threadID that isn't it.  Tid2thread should return NULL.
+
+
+----------
+Reference:
+----------
+Starting LWPS.
+tid2thread() coped with a bad value.
+Back from LWPS.
+----------
+Submitted:
+----------
+Add of next thread 0x417010
+Calling Thread 0x417010
+Next Thread 0x417010
+Add of next thread (nil)
+Starting LWPS.
+tid2thread() coped with a bad value.
+Back from LWPS.
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+0a1,4
+> Add of next thread 0x417010
+> Calling Thread 0x417010
+> Next Thread 0x417010
+> Add of next thread (nil)
 ---------
 =================================================
 TEST 28: Is thread library using sched_{one,two}?
@@ -3298,13 +5605,213 @@ Back from LWPS.
 ----------
 Submitted:
 ----------
-Child process (7559) exited due to signal (Segmentation fault).
+Stack base at 0x7f71d254a000
+Top of stack 0x7f71d2d4a070
+Stack loc for regs 0x7f71d2d4a060
+loc attempting to write to for ra 0x7f71d2d4a060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71d2d4a068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71d2d4a060
+Add at rbp loc 0x7f71d2d4a070
+rbp to become rsp 0x7f71d2d4a060
+Stack base at 0x7f71d1d49000
+Top of stack 0x7f71d2549070
+Stack loc for regs 0x7f71d2549060
+loc attempting to write to for ra 0x7f71d2549060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71d2549068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71d2549060
+Add at rbp loc 0x7f71d2549070
+rbp to become rsp 0x7f71d2549060
+Stack base at 0x7f71d1548000
+Top of stack 0x7f71d1d48070
+Stack loc for regs 0x7f71d1d48060
+loc attempting to write to for ra 0x7f71d1d48060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71d1d48068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71d1d48060
+Add at rbp loc 0x7f71d1d48070
+rbp to become rsp 0x7f71d1d48060
+Stack base at 0x7f71d0d47000
+Top of stack 0x7f71d1547070
+Stack loc for regs 0x7f71d1547060
+loc attempting to write to for ra 0x7f71d1547060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71d1547068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71d1547060
+Add at rbp loc 0x7f71d1547070
+rbp to become rsp 0x7f71d1547060
+Stack base at 0x7f71d0546000
+Top of stack 0x7f71d0d46070
+Stack loc for regs 0x7f71d0d46060
+loc attempting to write to for ra 0x7f71d0d46060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71d0d46068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71d0d46060
+Add at rbp loc 0x7f71d0d46070
+rbp to become rsp 0x7f71d0d46060
+Stack base at 0x7f71cfd45000
+Top of stack 0x7f71d0545070
+Stack loc for regs 0x7f71d0545060
+loc attempting to write to for ra 0x7f71d0545060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71d0545068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71d0545060
+Add at rbp loc 0x7f71d0545070
+rbp to become rsp 0x7f71d0545060
+Stack base at 0x7f71cf544000
+Top of stack 0x7f71cfd44070
+Stack loc for regs 0x7f71cfd44060
+loc attempting to write to for ra 0x7f71cfd44060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cfd44068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cfd44060
+Add at rbp loc 0x7f71cfd44070
+rbp to become rsp 0x7f71cfd44060
+Stack base at 0x7f71ced43000
+Top of stack 0x7f71cf543070
+Stack loc for regs 0x7f71cf543060
+loc attempting to write to for ra 0x7f71cf543060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cf543068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cf543060
+Add at rbp loc 0x7f71cf543070
+rbp to become rsp 0x7f71cf543060
+Stack base at 0x7f71ce542000
+Top of stack 0x7f71ced42070
+Stack loc for regs 0x7f71ced42060
+loc attempting to write to for ra 0x7f71ced42060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71ced42068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71ced42060
+Add at rbp loc 0x7f71ced42070
+rbp to become rsp 0x7f71ced42060
+Stack base at 0x7f71cdd41000
+Top of stack 0x7f71ce541070
+Stack loc for regs 0x7f71ce541060
+loc attempting to write to for ra 0x7f71ce541060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71ce541068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71ce541060
+Add at rbp loc 0x7f71ce541070
+rbp to become rsp 0x7f71ce541060
+Stack base at 0x7f71cd540000
+Top of stack 0x7f71cdd40070
+Stack loc for regs 0x7f71cdd40060
+loc attempting to write to for ra 0x7f71cdd40060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cdd40068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cdd40060
+Add at rbp loc 0x7f71cdd40070
+rbp to become rsp 0x7f71cdd40060
+Stack base at 0x7f71ccd3f000
+Top of stack 0x7f71cd53f070
+Stack loc for regs 0x7f71cd53f060
+loc attempting to write to for ra 0x7f71cd53f060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cd53f068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cd53f060
+Add at rbp loc 0x7f71cd53f070
+rbp to become rsp 0x7f71cd53f060
+Stack base at 0x7f71cc53e000
+Top of stack 0x7f71ccd3e070
+Stack loc for regs 0x7f71ccd3e060
+loc attempting to write to for ra 0x7f71ccd3e060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71ccd3e068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71ccd3e060
+Add at rbp loc 0x7f71ccd3e070
+rbp to become rsp 0x7f71ccd3e060
+Stack base at 0x7f71cbd3d000
+Top of stack 0x7f71cc53d070
+Stack loc for regs 0x7f71cc53d060
+loc attempting to write to for ra 0x7f71cc53d060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cc53d068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cc53d060
+Add at rbp loc 0x7f71cc53d070
+rbp to become rsp 0x7f71cc53d060
+Stack base at 0x7f71cb53c000
+Top of stack 0x7f71cbd3c070
+Stack loc for regs 0x7f71cbd3c060
+loc attempting to write to for ra 0x7f71cbd3c060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cbd3c068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cbd3c060
+Add at rbp loc 0x7f71cbd3c070
+rbp to become rsp 0x7f71cbd3c060
+Stack base at 0x7f71cad3b000
+Top of stack 0x7f71cb53b070
+Stack loc for regs 0x7f71cb53b060
+loc attempting to write to for ra 0x7f71cb53b060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cb53b068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cb53b060
+Add at rbp loc 0x7f71cb53b070
+rbp to become rsp 0x7f71cb53b060
+Stack base at 0x7f71ca53a000
+Top of stack 0x7f71cad3a070
+Stack loc for regs 0x7f71cad3a060
+loc attempting to write to for ra 0x7f71cad3a060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71cad3a068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71cad3a060
+Add at rbp loc 0x7f71cad3a070
+rbp to become rsp 0x7f71cad3a060
+Stack base at 0x7f71c9d39000
+Top of stack 0x7f71ca539070
+Stack loc for regs 0x7f71ca539060
+loc attempting to write to for ra 0x7f71ca539060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71ca539068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71ca539060
+Add at rbp loc 0x7f71ca539070
+rbp to become rsp 0x7f71ca539060
+Stack base at 0x7f71c9538000
+Top of stack 0x7f71c9d38070
+Stack loc for regs 0x7f71c9d38060
+loc attempting to write to for ra 0x7f71c9d38060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71c9d38068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71c9d38060
+Add at rbp loc 0x7f71c9d38070
+rbp to become rsp 0x7f71c9d38060
+Stack base at 0x7f71c8d37000
+Top of stack 0x7f71c9537070
+Stack loc for regs 0x7f71c9537060
+loc attempting to write to for ra 0x7f71c9537060
+Add of wrap 0x7f71d311a2ce
+RA loc 0x7f71c9537068
+Add at ra loc 0x7f71d311a2ce
+rbp loc 0x7f71c9537060
+Add at rbp loc 0x7f71c9537070
+rbp to become rsp 0x7f71c9537060
+Child process (17154) exited due to signal (Segmentation fault).
 
 ---------------------------------
 Differences (< reference > output)
 ---------------------------------
 
-1,212c1
+1,212c1,201
 < Launching LWPS
 <   1
 <      2
@@ -3518,5 +6025,205 @@ Differences (< reference > output)
 <                                                           20
 < Back from LWPS.
 ---
-> Child process (7559) exited due to signal (Segmentation fault).
+> Stack base at 0x7f71d254a000
+> Top of stack 0x7f71d2d4a070
+> Stack loc for regs 0x7f71d2d4a060
+> loc attempting to write to for ra 0x7f71d2d4a060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71d2d4a068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71d2d4a060
+> Add at rbp loc 0x7f71d2d4a070
+> rbp to become rsp 0x7f71d2d4a060
+> Stack base at 0x7f71d1d49000
+> Top of stack 0x7f71d2549070
+> Stack loc for regs 0x7f71d2549060
+> loc attempting to write to for ra 0x7f71d2549060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71d2549068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71d2549060
+> Add at rbp loc 0x7f71d2549070
+> rbp to become rsp 0x7f71d2549060
+> Stack base at 0x7f71d1548000
+> Top of stack 0x7f71d1d48070
+> Stack loc for regs 0x7f71d1d48060
+> loc attempting to write to for ra 0x7f71d1d48060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71d1d48068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71d1d48060
+> Add at rbp loc 0x7f71d1d48070
+> rbp to become rsp 0x7f71d1d48060
+> Stack base at 0x7f71d0d47000
+> Top of stack 0x7f71d1547070
+> Stack loc for regs 0x7f71d1547060
+> loc attempting to write to for ra 0x7f71d1547060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71d1547068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71d1547060
+> Add at rbp loc 0x7f71d1547070
+> rbp to become rsp 0x7f71d1547060
+> Stack base at 0x7f71d0546000
+> Top of stack 0x7f71d0d46070
+> Stack loc for regs 0x7f71d0d46060
+> loc attempting to write to for ra 0x7f71d0d46060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71d0d46068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71d0d46060
+> Add at rbp loc 0x7f71d0d46070
+> rbp to become rsp 0x7f71d0d46060
+> Stack base at 0x7f71cfd45000
+> Top of stack 0x7f71d0545070
+> Stack loc for regs 0x7f71d0545060
+> loc attempting to write to for ra 0x7f71d0545060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71d0545068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71d0545060
+> Add at rbp loc 0x7f71d0545070
+> rbp to become rsp 0x7f71d0545060
+> Stack base at 0x7f71cf544000
+> Top of stack 0x7f71cfd44070
+> Stack loc for regs 0x7f71cfd44060
+> loc attempting to write to for ra 0x7f71cfd44060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cfd44068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cfd44060
+> Add at rbp loc 0x7f71cfd44070
+> rbp to become rsp 0x7f71cfd44060
+> Stack base at 0x7f71ced43000
+> Top of stack 0x7f71cf543070
+> Stack loc for regs 0x7f71cf543060
+> loc attempting to write to for ra 0x7f71cf543060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cf543068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cf543060
+> Add at rbp loc 0x7f71cf543070
+> rbp to become rsp 0x7f71cf543060
+> Stack base at 0x7f71ce542000
+> Top of stack 0x7f71ced42070
+> Stack loc for regs 0x7f71ced42060
+> loc attempting to write to for ra 0x7f71ced42060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71ced42068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71ced42060
+> Add at rbp loc 0x7f71ced42070
+> rbp to become rsp 0x7f71ced42060
+> Stack base at 0x7f71cdd41000
+> Top of stack 0x7f71ce541070
+> Stack loc for regs 0x7f71ce541060
+> loc attempting to write to for ra 0x7f71ce541060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71ce541068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71ce541060
+> Add at rbp loc 0x7f71ce541070
+> rbp to become rsp 0x7f71ce541060
+> Stack base at 0x7f71cd540000
+> Top of stack 0x7f71cdd40070
+> Stack loc for regs 0x7f71cdd40060
+> loc attempting to write to for ra 0x7f71cdd40060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cdd40068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cdd40060
+> Add at rbp loc 0x7f71cdd40070
+> rbp to become rsp 0x7f71cdd40060
+> Stack base at 0x7f71ccd3f000
+> Top of stack 0x7f71cd53f070
+> Stack loc for regs 0x7f71cd53f060
+> loc attempting to write to for ra 0x7f71cd53f060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cd53f068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cd53f060
+> Add at rbp loc 0x7f71cd53f070
+> rbp to become rsp 0x7f71cd53f060
+> Stack base at 0x7f71cc53e000
+> Top of stack 0x7f71ccd3e070
+> Stack loc for regs 0x7f71ccd3e060
+> loc attempting to write to for ra 0x7f71ccd3e060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71ccd3e068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71ccd3e060
+> Add at rbp loc 0x7f71ccd3e070
+> rbp to become rsp 0x7f71ccd3e060
+> Stack base at 0x7f71cbd3d000
+> Top of stack 0x7f71cc53d070
+> Stack loc for regs 0x7f71cc53d060
+> loc attempting to write to for ra 0x7f71cc53d060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cc53d068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cc53d060
+> Add at rbp loc 0x7f71cc53d070
+> rbp to become rsp 0x7f71cc53d060
+> Stack base at 0x7f71cb53c000
+> Top of stack 0x7f71cbd3c070
+> Stack loc for regs 0x7f71cbd3c060
+> loc attempting to write to for ra 0x7f71cbd3c060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cbd3c068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cbd3c060
+> Add at rbp loc 0x7f71cbd3c070
+> rbp to become rsp 0x7f71cbd3c060
+> Stack base at 0x7f71cad3b000
+> Top of stack 0x7f71cb53b070
+> Stack loc for regs 0x7f71cb53b060
+> loc attempting to write to for ra 0x7f71cb53b060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cb53b068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cb53b060
+> Add at rbp loc 0x7f71cb53b070
+> rbp to become rsp 0x7f71cb53b060
+> Stack base at 0x7f71ca53a000
+> Top of stack 0x7f71cad3a070
+> Stack loc for regs 0x7f71cad3a060
+> loc attempting to write to for ra 0x7f71cad3a060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71cad3a068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71cad3a060
+> Add at rbp loc 0x7f71cad3a070
+> rbp to become rsp 0x7f71cad3a060
+> Stack base at 0x7f71c9d39000
+> Top of stack 0x7f71ca539070
+> Stack loc for regs 0x7f71ca539060
+> loc attempting to write to for ra 0x7f71ca539060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71ca539068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71ca539060
+> Add at rbp loc 0x7f71ca539070
+> rbp to become rsp 0x7f71ca539060
+> Stack base at 0x7f71c9538000
+> Top of stack 0x7f71c9d38070
+> Stack loc for regs 0x7f71c9d38060
+> loc attempting to write to for ra 0x7f71c9d38060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71c9d38068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71c9d38060
+> Add at rbp loc 0x7f71c9d38070
+> rbp to become rsp 0x7f71c9d38060
+> Stack base at 0x7f71c8d37000
+> Top of stack 0x7f71c9537070
+> Stack loc for regs 0x7f71c9537060
+> loc attempting to write to for ra 0x7f71c9537060
+> Add of wrap 0x7f71d311a2ce
+> RA loc 0x7f71c9537068
+> Add at ra loc 0x7f71d311a2ce
+> rbp loc 0x7f71c9537060
+> Add at rbp loc 0x7f71c9537070
+> rbp to become rsp 0x7f71c9537060
+> Child process (17154) exited due to signal (Segmentation fault).
 ---------

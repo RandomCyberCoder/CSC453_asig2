@@ -13,18 +13,19 @@
 
 #define STACK_SIZE 8388608
 #define MAP_ANONYMOUS 0x20
+#define ALIGN_FACTOR 16
 #define ADDRESS_SIZE 8
 #define SYS_FAIL -1
 #define NO_FD -1
 #define EVEN_PAGE 0
 #define NO_OFF 0
 #define INIT 1
-#define PREV 1
+#define NEXT 1
 #define EMPTY 0
 
 /*
 lib_one is a next pointer for the next thread in a list
-lib_two is a prev pointer for the prev thread in a list
+lib_two is a NEXT pointer for the NEXT thread in a list
 */
 
 /*Create RoundRobin scheduler and set it to currentScheduler by default*/
@@ -107,6 +108,11 @@ size_t create_stackSizeHelper()
         }
     }
 
+    while (howBig % ALIGN_FACTOR)
+    {
+        howBig += pageSize;
+    }
+
     return howBig;
 }
 
@@ -118,7 +124,7 @@ void add_thread_to_pool(thread newThread)
     if (threadPool == NULL)
     {
         threadPool = newThread;
-        newThread->lib_one = NULL; //ED added this line
+        newThread->lib_one = NULL; // ED added this line
         newThread->lib_two = NULL;
     }
     else
@@ -168,7 +174,7 @@ int remove_thread_from_pool(thread victim)
         }
     }
 
-    /*If we're the last thread, just update the prev thread's next pointer*/
+    /*If we're the last thread, just update the NEXT thread's next pointer*/
 
     if (currThread->lib_one == NULL)
     {
@@ -246,16 +252,14 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*initialize the stack*/
 
+    fprintf(stderr, "Stack base at %p\n", stackBase);
+
     getBaseLoc = (uintptr_t)newThread->stack;
-    //getBaseLoc += howBig - (ADDRESS_SIZE * 2);
-    getBaseLoc += howBig;
 
-    /*check if the address is divisible by 16*/
-    if(getBaseLoc % 16 != 0){
-        getBaseLoc -= (getBaseLoc % 16);
-    }
+    fprintf(stderr, "Top of stack %p\n",
+            (unsigned long *)(getBaseLoc + howBig));
 
-    getBaseLoc -= (ADDRESS_SIZE * 2);
+    getBaseLoc += howBig - (ADDRESS_SIZE * 2);
 
     /*"Push" the address of lwp_wrap to the top of the
     stack so that when ret happens, it pops this address
@@ -263,29 +267,49 @@ tid_t lwp_create(lwpfun fun, void *arg)
     Also "Push" the sbp of the stack allocated by mmap
     so it returns to the appropriate stack frame ASK NICO*/
 
-    //newThread->stack[howBig - PREV] = (unsigned long)lwp_wrap;
-    //newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
+    fprintf(stderr, "Stack loc for regs %p\n", (unsigned long *)getBaseLoc);
 
-    calcAddress = getBaseLoc;
-    calcAddress -= ADDRESS_SIZE;
-    registerAddress = (unsigned long *)calcAddress;
+    registerAddress = (unsigned long *)getBaseLoc;
 
-    /*add lwp_wrap's function address to the bottom of 
-    the stack*/
-    registerAddress[0] = (unsigned long)lwp_wrap;
+    fprintf(stderr, "loc attempting to write to for ra %p\n",
+            registerAddress);
 
-    /*place an address for the base pointer to be assigned 
-    on the stack*/
-    calcAddress -= ADDRESS_SIZE;
-    registerAddress = (unsigned long *)calcAddress;
-    registerAddress[0] = getBaseLoc;
-    
+    *registerAddress = (unsigned long *) (getBaseLoc +
+                        ADDRESS_SIZE * 2);
+
+    fprintf(stderr, "Add of wrap %p\n",
+            (unsigned long *)lwp_wrap);
+    *(registerAddress + NEXT) = (unsigned long *)lwp_wrap;
+
+    fprintf(stderr, "RA loc %p\n", registerAddress + NEXT);
+    fprintf(stderr, "Add at ra loc %p\n",
+            *(registerAddress + NEXT));
+    fprintf(stderr, "rbp loc %p\n", registerAddress);
+    fprintf(stderr, "Add at rbp loc %p\n",
+            *registerAddress);
+
+    // calcAddress = getBaseLoc;
+    // calcAddress -= ADDRESS_SIZE;
+    //
+
+    // /*add lwp_wrap's function address to the bottom of
+    // the stack*/
+    // registerAddress[0] = (unsigned long)lwp_wrap;
+
+    // /*place an address for the base pointer to be assigned
+    // on the stack*/
+    // calcAddress -= ADDRESS_SIZE;
+    // registerAddress = (unsigned long *)calcAddress;
+    // registerAddress[0] = getBaseLoc;
 
     /*Set rbp to the address of the rbp reg on our stack
     so that when it is popped inside leave and ret, it pops
     our rbp filler value and then the address of lwp_wrap for ret*/
-
+    
     newThread->state.rbp = (unsigned long)(getBaseLoc);
+
+    fprintf(stderr, "rbp to become rsp %p\n",
+            (unsigned long *)(getBaseLoc));
 
     /*Add thread to thread pool*/
 
@@ -342,13 +366,16 @@ void lwp_start(void)
 
 void lwp_yield(void)
 {
-    thread nextThread;
+    thread oldThread, nextThread;
     unsigned int status, retStatus;
     /*Yield control to the next LWP in the schedule*/
 
     /*Get the next thread from the scheduler*/
 
     nextThread = currentScheduler->next();
+
+    fprintf(stderr, "Add of next thread %p\n",
+            (unsigned long *)nextThread);
 
     /*If there is no next thread, terminate the program*/
 
@@ -360,7 +387,7 @@ void lwp_yield(void)
 
         /*Shutdown the scheduler if necessary*/
 
-        if (currentScheduler->shutdown != NULL) 
+        if (currentScheduler->shutdown != NULL)
         {
             currentScheduler->shutdown();
         }
@@ -378,8 +405,8 @@ void lwp_yield(void)
 
         /*Deallocate the threads resources*/
 
-        /*If the thread is the system thread, 
-        do nothing about a stack and 
+        /*If the thread is the system thread,
+        do nothing about a stack and
         free the thread context*/
 
         if (callingThread->stack == NULL)
@@ -391,7 +418,7 @@ void lwp_yield(void)
             exit(status);
         }
 
-        /*Otherwise, unmap its memory region, free the 
+        /*Otherwise, unmap its memory region, free the
         thread context, and exit*/
 
         retStatus = munmap(callingThread->stack, callingThread->stacksize);
@@ -401,7 +428,7 @@ void lwp_yield(void)
         {
             perror("Failed to unmap region");
         }
-        
+
         free(callingThread);
 
         /*Exit with syscall a*/
@@ -411,8 +438,14 @@ void lwp_yield(void)
 
     /*Otherwise, set callingThread and swap contexts*/
 
+    oldThread = callingThread;
     callingThread = nextThread;
-    swap_rfiles(&(callingThread->state), &(nextThread->state));
+
+    fprintf(stderr, "Calling Thread %p\n",
+            (unsigned long *)oldThread);
+    fprintf(stderr, "Next Thread %p\n",
+            (unsigned long *)nextThread);
+    swap_rfiles(&(oldThread->state), &(nextThread->state));
 }
 
 void lwp_exit(int exitval)
@@ -438,8 +471,8 @@ void lwp_exit(int exitval)
     if (terminated == NULL)
     {
         terminated = callingThread;
-    } 
-    else 
+    }
+    else
     {
         /*Search for the end of the terminated list*/
 
@@ -490,7 +523,7 @@ tid_t lwp_wait(int *status)
 
     currThread = terminated;
 
-    /*If there are no terminated threads, add this 
+    /*If there are no terminated threads, add this
     thread to the waiting thread list*/
 
     if (currThread == NULL)
@@ -508,7 +541,9 @@ tid_t lwp_wait(int *status)
             /*If waiting list is empty, set head to caller*/
 
             waiting = callingThread;
-        } else {
+        }
+        else
+        {
             /*Search for end of waiting thread list*/
 
             while (currThread->exited != NULL)
@@ -549,7 +584,7 @@ tid_t lwp_wait(int *status)
 
             /*Deallocate the threads resources*/
 
-            /*If the thread is the system thread, 
+            /*If the thread is the system thread,
             do nothing about a stack and return it's id
             after freeing the thread context*/
 
@@ -559,7 +594,7 @@ tid_t lwp_wait(int *status)
                 return NO_THREAD;
             }
 
-            /*Otherwise, unmap its memory region, free the 
+            /*Otherwise, unmap its memory region, free the
             thread context, and return the id*/
 
             retStatus = munmap(currThread->stack, currThread->stacksize);
@@ -569,11 +604,11 @@ tid_t lwp_wait(int *status)
             {
                 perror("Failed to unmap region");
             }
-            
+
             free(currThread);
             /*Shutdown the scheduler if needed*/
 
-            if(currentScheduler->shutdown != NULL)
+            if (currentScheduler->shutdown != NULL)
             {
                 currentScheduler->shutdown();
             }
@@ -618,7 +653,7 @@ tid_t lwp_wait(int *status)
 
     /*Deallocate the threads resources*/
 
-    /*If the thread is the system thread, 
+    /*If the thread is the system thread,
     do nothing about a stack and return it's id
     after freeing the thread context*/
 
@@ -628,7 +663,7 @@ tid_t lwp_wait(int *status)
         return tid;
     }
 
-    /*Otherwise, unmap its memory region, free the 
+    /*Otherwise, unmap its memory region, free the
     thread context, and return the id*/
 
     retStatus = munmap(currThread->stack, currThread->stacksize);
@@ -638,7 +673,7 @@ tid_t lwp_wait(int *status)
     {
         perror("Failed to unmap region");
     }
-    
+
     free(currThread);
     return tid;
 }
@@ -647,9 +682,9 @@ thread tid2thread(tid_t tid)
 {
     thread checkThread = threadPool;
 
-    while(checkThread != NULL)
+    while (checkThread != NULL)
     {
-        if(tid == checkThread->tid)
+        if (tid == checkThread->tid)
         {
             return checkThread;
         }
@@ -673,45 +708,43 @@ tid_t lwp_gettid(void)
     return NO_THREAD;
 }
 
-
 void lwp_set_scheduler(scheduler fun)
 {
     scheduler oldScheduler;
     thread nxtThread;
 
-    if(fun == NULL && currentScheduler == &rr_publish)
+    if (fun == NULL && currentScheduler == &rr_publish)
     {
         return;
     }
-    else if(fun == NULL && currentScheduler != &rr_publish){
+    else if (fun == NULL && currentScheduler != &rr_publish)
+    {
         oldScheduler = currentScheduler;
         currentScheduler = &rr_publish;
     }
-    else{
+    else
+    {
         oldScheduler = currentScheduler;
-        currentScheduler = fun; 
+        currentScheduler = fun;
     }
 
-
-    if(currentScheduler->init != NULL)
+    if (currentScheduler->init != NULL)
     {
         currentScheduler->init();
-    }   
+    }
 
-
-    for(nxtThread = oldScheduler->next();
-        nxtThread != NULL; nxtThread = oldScheduler->next())
+    for (nxtThread = oldScheduler->next();
+         nxtThread != NULL; nxtThread = oldScheduler->next())
     {
-        
+
         oldScheduler->remove(nxtThread);
         currentScheduler->admit(nxtThread);
     }
 
-    if(oldScheduler->shutdown != NULL)
+    if (oldScheduler->shutdown != NULL)
     {
         oldScheduler->shutdown();
     }
-    
 }
 
 scheduler lwp_get_scheduler()

@@ -2,6 +2,7 @@
 #include "fp.h"
 #include "roundRobin.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -21,6 +22,8 @@ unsigned long qLen = 0;
 
 void rrAdmit(thread new)
 {
+    thread curr;
+
     if (head == NULL)
     {
         /*
@@ -52,6 +55,20 @@ void rrAdmit(thread new)
         tail = new;
         qLen += 1;
     }
+
+    fprintf(stderr, "Admitted thread %p\n",
+            (unsigned long *)new);
+
+    curr = head;
+    fprintf(stderr, "In Admitted: Head %p\n",
+            (unsigned long *)curr);
+    curr = curr->sched_one;
+    while (curr != NULL)
+    {
+        fprintf(stderr, "Next %p\n",
+                (unsigned long *)curr);
+        curr = curr->sched_one;
+    }
 }
 
 void rrRemove(thread victim)
@@ -60,7 +77,11 @@ void rrRemove(thread victim)
     thread prvThread;
     thread nxtThread;
 
-    if(head == NULL){
+    fprintf(stderr, "Removing %p\n",
+            (unsigned long *)victim);
+
+    if (head == NULL)
+    {
         return;
     }
     /*if the thread is the first victim*/
@@ -82,7 +103,7 @@ void rrRemove(thread victim)
     {
         curThread = curThread->sched_one;
 
-        /*If you don't find the victim and reach 
+        /*If you don't find the victim and reach
         the end of the list just return*/
 
         if (curThread == NULL)
@@ -116,24 +137,36 @@ thread rrNext()
 {
     /*NOTE: the first thread in the list is the next thread that will run.*/
 
-    thread nextThread;
-    thread oldTailThread;
-    thread newHeadThread;
+    thread oldTailThread, nextThread, newHeadThread, curr;
 
-    if (qLen == 0){
+    
+
+    if (qLen == 0)
+    {
         /*if there are no threads return NULL*/
         return NULL;
     }
     else if (qLen == 1)
     {
+        curr = head;
+        fprintf(stderr, "In Next: Head %p\n",
+                (unsigned long *)curr);
         /*if there is only one thread available*/
-        nextThread = head;
-        head = NULL;
-        tail = NULL;
-        qLen -= 1;
+        return head;
     }
     else
     {
+        curr = head;
+        fprintf(stderr, "In Next: Head %p\n",
+                (unsigned long *)curr);
+        curr = curr->sched_one;
+        while (curr != NULL)
+        {
+            fprintf(stderr, "Next %p\n",
+                    (unsigned long *)curr);
+            curr = curr->sched_one;
+        }
+
         /*thread we will return*/
         nextThread = head;
 
@@ -155,6 +188,17 @@ thread rrNext()
         */
         tail = head;
         head = newHeadThread;
+    }
+
+    curr = head;
+    fprintf(stderr, "New Head %p\n",
+            (unsigned long *)curr);
+    curr = curr->sched_one;
+    while (curr != NULL)
+    {
+        fprintf(stderr, "Next %p\n",
+                (unsigned long *)curr);
+        curr = curr->sched_one;
     }
 
     return nextThread;

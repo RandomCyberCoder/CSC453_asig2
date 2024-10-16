@@ -32,7 +32,7 @@ roundRobin.o: roundRobin.h roundRobin.c
 	$(LD) -Wall -g -fPIC -o roundRobin.o roundRobin.c
 
 magic64.o: magic64.S
-	$(LD) -Wall -g -fPIC -o magic64.o -c magic64.S
+	$(LD) -o magic64.o -c magic64.S
 
 all: 	$(PROGS)
 

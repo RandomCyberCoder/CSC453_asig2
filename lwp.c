@@ -297,14 +297,12 @@ tid_t lwp_create(lwpfun fun, void *arg)
             ... rbp lwp_wrap "caller"... ret lwp_wrap "caller"  */
     registerAddress = (unsigned long *)getBaseLoc;
     //fprintf(stderr, "reg_address loc %p\n", registerAddress);
-    *(registerAddress) = (unsigned long) (getBaseLoc +
+    registerAddress[0] = (unsigned long) (getBaseLoc +
                         ADDRESS_SIZE * 2);
-    registerAddress += NEXT;
-    *(registerAddress) = (unsigned long)lwp_wrap;
+    registerAddress[NEXT] = (unsigned long)lwp_wrap;
 
     //will never be used but needed on stack
-    registerAddress += NEXT;
-    *(registerAddress) = (unsigned long) (getBaseLoc +
+    registerAddress[2*NEXT] = (unsigned long) (getBaseLoc +
                         ADDRESS_SIZE * 4);
 
     //registerAddress += NEXT;

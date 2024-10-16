@@ -4,7 +4,9 @@ CFLAGS  = -Wall -g -I ../include
 
 LD 	= gcc
 
-LDFLAGS  = -Wall -g -L../lib64
+LIBDIR 	= ../
+
+LDFLAGS = -g -Wall -L$(LIBDIR) -llwp
 
 PROGS	= snakes nums hungry
 
@@ -37,10 +39,8 @@ magic64.o: magic64.S
 rmcore:
 	rm -f core*
 
-test: prog.o
-	
-prog.o: prog.c
-
+test: prog.c lwp.c magic64.S roundRobin.c
+	$(LD) -g -Wall -o $@ prog.c -L./ -llwp
 
 all: 	$(PROGS)
 

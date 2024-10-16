@@ -252,12 +252,12 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*initialize the stack*/
 
-    fprintf(stderr, "Stack base at %p\n", stackBase);
+    /*fprintf(stderr, "Stack base at %p\n", stackBase);*/
 
     getBaseLoc = (uintptr_t)newThread->stack;
 
-    fprintf(stderr, "Top of stack %p\n",
-            (unsigned long *)(getBaseLoc + howBig));
+    /*fprintf(stderr, "Top of stack %p\n",
+            (unsigned long *)(getBaseLoc + howBig));*/
 
     getBaseLoc += howBig - (ADDRESS_SIZE * 2);
 
@@ -267,26 +267,26 @@ tid_t lwp_create(lwpfun fun, void *arg)
     Also "Push" the sbp of the stack allocated by mmap
     so it returns to the appropriate stack frame ASK NICO*/
 
-    fprintf(stderr, "Stack loc for regs %p\n", (unsigned long *)getBaseLoc);
+    /*fprintf(stderr, "Stack loc for regs %p\n", (unsigned long *)getBaseLoc);*/
 
     registerAddress = (unsigned long *)getBaseLoc;
 
-    fprintf(stderr, "loc attempting to write to for ra %p\n",
-            registerAddress);
+    /*fprintf(stderr, "loc attempting to write to for ra %p\n",
+            registerAddress);*/
 
-    *registerAddress = (unsigned long *) (getBaseLoc +
+    *registerAddress = (unsigned long) (getBaseLoc +
                         ADDRESS_SIZE * 2);
 
-    fprintf(stderr, "Add of wrap %p\n",
-            (unsigned long *)lwp_wrap);
-    *(registerAddress + NEXT) = (unsigned long *)lwp_wrap;
+    /*fprintf(stderr, "Add of wrap %p\n",
+            (unsigned long *)lwp_wrap);*/
+    *(registerAddress + NEXT) = (unsigned long)lwp_wrap;
 
-    fprintf(stderr, "RA loc %p\n", registerAddress + NEXT);
+    /*fprintf(stderr, "RA loc %p\n", registerAddress + NEXT); 
     fprintf(stderr, "Add at ra loc %p\n",
             *(registerAddress + NEXT));
     fprintf(stderr, "rbp loc %p\n", registerAddress);
     fprintf(stderr, "Add at rbp loc %p\n",
-            *registerAddress);
+            *registerAddress);*/
 
     // calcAddress = getBaseLoc;
     // calcAddress -= ADDRESS_SIZE;
@@ -308,8 +308,8 @@ tid_t lwp_create(lwpfun fun, void *arg)
     
     newThread->state.rbp = (unsigned long)(getBaseLoc);
 
-    fprintf(stderr, "rbp to become rsp %p\n",
-            (unsigned long *)(getBaseLoc));
+    /*fprintf(stderr, "rbp to become rsp %p\n",
+            (unsigned long *)(getBaseLoc));*/
 
     /*Add thread to thread pool*/
 
@@ -374,8 +374,8 @@ void lwp_yield(void)
 
     nextThread = currentScheduler->next();
 
-    fprintf(stderr, "Add of next thread %p\n",
-            (unsigned long *)nextThread);
+    /*fprintf(stderr, "Add of next thread %p\n",
+            (unsigned long *)nextThread);*/
 
     /*If there is no next thread, terminate the program*/
 
@@ -441,10 +441,10 @@ void lwp_yield(void)
     oldThread = callingThread;
     callingThread = nextThread;
 
-    fprintf(stderr, "Calling Thread %p\n",
+    /*fprintf(stderr, "Calling Thread %p\n",
             (unsigned long *)oldThread);
     fprintf(stderr, "Next Thread %p\n",
-            (unsigned long *)nextThread);
+            (unsigned long *)nextThread);*/
     swap_rfiles(&(oldThread->state), &(nextThread->state));
 }
 

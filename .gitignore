@@ -1,6 +1,4 @@
 .vscode
 copy.c
-liblwp.so
-lwp.o
-magic64.o
-roundRobin.o
+*.so
+*.o

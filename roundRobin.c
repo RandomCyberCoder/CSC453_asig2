@@ -56,17 +56,17 @@ void rrAdmit(thread new)
         qLen += 1;
     }
 
-    fprintf(stderr, "Admitted thread %p\n",
-            (unsigned long *)new);
+    /*fprintf(stderr, "Admitted thread %p\n",
+            (unsigned long *)new);*/
 
     curr = head;
-    fprintf(stderr, "In Admitted: Head %p\n",
-            (unsigned long *)curr);
+    /*fprintf(stderr, "In Admitted: Head %p\n",
+            (unsigned long *)curr);*/
     curr = curr->sched_one;
     while (curr != NULL)
     {
-        fprintf(stderr, "Next %p\n",
-                (unsigned long *)curr);
+        /*fprintf(stderr, "Next %p\n",
+                (unsigned long *)curr);*/
         curr = curr->sched_one;
     }
 }
@@ -77,8 +77,8 @@ void rrRemove(thread victim)
     thread prvThread;
     thread nxtThread;
 
-    fprintf(stderr, "Removing %p\n",
-            (unsigned long *)victim);
+    /*fprintf(stderr, "Removing %p\n",
+            (unsigned long *)victim);*/
 
     if (head == NULL)
     {
@@ -149,21 +149,21 @@ thread rrNext()
     else if (qLen == 1)
     {
         curr = head;
-        fprintf(stderr, "In Next: Head %p\n",
-                (unsigned long *)curr);
+        /*fprintf(stderr, "In Next: Head %p\n",
+                (unsigned long *)curr);*/
         /*if there is only one thread available*/
         return head;
     }
     else
     {
         curr = head;
-        fprintf(stderr, "In Next: Head %p\n",
-                (unsigned long *)curr);
+        /*fprintf(stderr, "In Next: Head %p\n",
+                (unsigned long *)curr);*/
         curr = curr->sched_one;
         while (curr != NULL)
         {
-            fprintf(stderr, "Next %p\n",
-                    (unsigned long *)curr);
+            /*fprintf(stderr, "Next %p\n",
+                    (unsigned long *)curr);*/
             curr = curr->sched_one;
         }
 
@@ -191,13 +191,13 @@ thread rrNext()
     }
 
     curr = head;
-    fprintf(stderr, "New Head %p\n",
-            (unsigned long *)curr);
+    /*fprintf(stderr, "New Head %p\n",
+            (unsigned long *)curr);*/
     curr = curr->sched_one;
     while (curr != NULL)
     {
-        fprintf(stderr, "Next %p\n",
-                (unsigned long *)curr);
+        /*fprintf(stderr, "Next %p\n",
+                (unsigned long *)curr);*/
         curr = curr->sched_one;
     }
 

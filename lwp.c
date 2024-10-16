@@ -254,12 +254,12 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*fprintf(stderr, "Stack base at %p\n", stackBase);*/
 
-    getBaseLoc = (uintptr_t)newThread->stack;
+    // old getBaseLoc = (uintptr_t)newThread->stack;
 
     /*fprintf(stderr, "Top of stack %p\n",
             (unsigned long *)(getBaseLoc + howBig));*/
 
-    getBaseLoc += howBig - (ADDRESS_SIZE * 2);
+    // old getBaseLoc += howBig - (ADDRESS_SIZE * 2);
 
     /*"Push" the address of lwp_wrap to the top of the
     stack so that when ret happens, it pops this address
@@ -269,17 +269,17 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*fprintf(stderr, "Stack loc for regs %p\n", (unsigned long *)getBaseLoc);*/
 
-    registerAddress = (unsigned long *)getBaseLoc;
+    // old registerAddress = (unsigned long *)getBaseLoc;
 
     /*fprintf(stderr, "loc attempting to write to for ra %p\n",
             registerAddress);*/
 
-    *registerAddress = (unsigned long) (getBaseLoc +
-                        ADDRESS_SIZE * 2);
+    /* old *registerAddress = (unsigned long) (getBaseLoc +
+                        ADDRESS_SIZE * 2);*/
 
     /*fprintf(stderr, "Add of wrap %p\n",
             (unsigned long *)lwp_wrap);*/
-    *(registerAddress + NEXT) = (unsigned long)lwp_wrap;
+    // old *(registerAddress + NEXT) = (unsigned long)lwp_wrap;
 
     /*fprintf(stderr, "RA loc %p\n", registerAddress + NEXT); 
     fprintf(stderr, "Add at ra loc %p\n",
@@ -287,20 +287,28 @@ tid_t lwp_create(lwpfun fun, void *arg)
     fprintf(stderr, "rbp loc %p\n", registerAddress);
     fprintf(stderr, "Add at rbp loc %p\n",
             *registerAddress);*/
+    
+    getBaseLoc = (uintptr_t)newThread->stack;
+    getBaseLoc += howBig - (ADDRESS_SIZE * 3);
+    fprintf(stderr, "rbp loc %d\n", getBaseLoc);
+    fprintf(stderr, "rbp loc %d\n", getBaseLoc);
+    //assuming it register takes 8 bytes off the stack
+    /* top of stack -> bottom of stack: somewhere rbp ... lwp_wrap
+            ... rbp lwp_wrap "caller"... ret lwp_wrap "caller"  */
+    registerAddress = (unsigned long *)getBaseLoc;
+    //fprintf(stderr, "reg_address loc %p\n", registerAddress);
+    *(registerAddress) = (unsigned long) (getBaseLoc +
+                        ADDRESS_SIZE * 2);
+    registerAddress += NEXT;
+    *(registerAddress) = (unsigned long)lwp_wrap;
 
-    // calcAddress = getBaseLoc;
-    // calcAddress -= ADDRESS_SIZE;
-    //
+    //will never be used but needed on stack
+    registerAddress += NEXT;
+    *(registerAddress) = (unsigned long) (getBaseLoc +
+                        ADDRESS_SIZE * 4);
 
-    // /*add lwp_wrap's function address to the bottom of
-    // the stack*/
-    // registerAddress[0] = (unsigned long)lwp_wrap;
-
-    // /*place an address for the base pointer to be assigned
-    // on the stack*/
-    // calcAddress -= ADDRESS_SIZE;
-    // registerAddress = (unsigned long *)calcAddress;
-    // registerAddress[0] = getBaseLoc;
+    //registerAddress += NEXT;
+    // *(registerAddress) = (unsigned long)lwp_wrap;
 
     /*Set rbp to the address of the rbp reg on our stack
     so that when it is popped inside leave and ret, it pops

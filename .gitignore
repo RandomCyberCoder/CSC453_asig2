@@ -2,3 +2,4 @@
 copy.c
 *.so
 *.o
+t_script*

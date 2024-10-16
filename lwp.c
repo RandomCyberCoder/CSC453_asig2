@@ -290,8 +290,8 @@ tid_t lwp_create(lwpfun fun, void *arg)
     
     getBaseLoc = (uintptr_t)newThread->stack;
     getBaseLoc += howBig - (ADDRESS_SIZE * 3);
-    fprintf(stderr, "rbp loc %d\n", getBaseLoc);
-    fprintf(stderr, "rbp loc %d\n", getBaseLoc);
+    //fprintf(stderr, "rbp loc %d\n", getBaseLoc);
+    //fprintf(stderr, "rbp loc %d\n", getBaseLoc);
     //assuming it register takes 8 bytes off the stack
     /* top of stack -> bottom of stack: somewhere rbp ... lwp_wrap
             ... rbp lwp_wrap "caller"... ret lwp_wrap "caller"  */

@@ -4,7 +4,7 @@ CFLAGS  = -Wall -g -I ../include
 
 LD 	= gcc
 
-LDFLAGS  = -Wall -g -L../lib64
+LDFLAGS  = -Wall -g -L.
 
 PROGS	= snakes nums hungry
 
@@ -56,8 +56,11 @@ snakes: randomsnakes.o util.o ../lib64/libPLN.so ../lib64/libsnakes.so
 hungry: hungrysnakes.o  util.o ../lib64/libPLN.so ../lib64/libsnakes.so
 	$(LD) $(LDFLAGS) -o hungry hungrysnakes.o util.o $(SNAKELIBS)
 
-nums: numbersmain.o  util.o ../lib64/libPLN.so 
+nums: numbersmain.o  util.o libPLN.so 
 	$(LD) $(LDFLAGS) -o nums numbersmain.o -lPLN
+
+numsTest: numbersmain.o  util.o liblwp.so
+	$(LD) $(LDFLAGS) -o numsTest numbersmain.o -llwp
 
 hungrysnakes.o: hungrysnakes.c ../include/lwp.h ../include/snakes.h
 	$(CC) $(CFLAGS) -c hungrysnakes.c
@@ -68,14 +71,17 @@ randomsnakes.o: randomsnakes.c ../include/lwp.h ../include/snakes.h
 numbermain.o: numbersmain.c lwp.h
 	$(CC) $(CFLAGS) -c numbersmain.c
 
-util.o: util.c ../include/lwp.h ../include/util.h ../include/snakes.h
+util.o: util.c lwp.h util.h snakes.h
 	$(CC) $(CFLAGS) -c util.c
 
 rs: snakes
-	(export LD_LIBRARY_PATH=../lib64; ./snakes)
+	(export LD_LIBRARY_PATH=.; ./snakes)
 
 hs: hungry
 	(export LD_LIBRARY_PATH=../lib64; ./hungry)
 
 ns: nums
-	(export LD_LIBRARY_PATH=../lib64; ./nums)
+	(export LD_LIBRARY_PATH=.; ./nums)
+
+nsT: numsTest
+	(export LD_LIBRARY_PATH=.; ./numsTest)

@@ -1,0 +1,3522 @@
+
+------------------------
+Looking for source files
+------------------------
+
+Found: fp.h hungrysnakes.c lwp.c lwp.h numbersmain.c randomsnakes.c roundRobin.c roundRobin.h schedulers.h snakes.h util.c util.h
+
+-----------------------
+Looking for a Makefile
+----------------------
+
+Found: Makefile
+
+--------------------------------
+Checking for long lines (no program should have any lines > 80 chars)
+--------------------------------
+
+Line length ok.
+
+
+------------------------------------
+Building the application: "make liblwp.so"
+------------------------------------
+
+make liblwp.so
+gcc -o magic64.o -c magic64.S
+gcc -Wall -g -fPIC -c -o roundRobin.o roundRobin.c
+gcc -Wall -g -fPIC -c -o lwp.o -c lwp.c
+gcc -shared -fPIC -o liblwp.so lwp.o roundRobin.o magic64.o
+
+---------------
+checking for liblwp.so
+---------------
+
+
+--------------------------------------------------------
+Test Results:
+   These are the results of trying your liblwp.so
+against several programs with different characteristics 
+described by the filename.  The output of your program
+is compared to a reference output using diff(1).  If they
+differ, the test case is a failure.
+
+
+Testing (failure details below):
+        -----
+         1) Linking (only) against required routines      ... ok.
+         2) Create a thread, but don't run it.            ... FAILURE.
+         3) start(). System thread only. Calls exit(3);   ... ok.
+         4) start(). System thread only. Calls lwp_exit() ... ok.
+         5) Check stack frame alignment                   ... FAILURE.
+         6) One lwp, calling lwp_yield(), then exit()     ... FAILURE.
+         7) One created lwp which calls exit(3), main() l ... FAILURE.
+         8) Five lwps, calling lwp_yield(), then exit()   ... FAILURE.
+         9) Five lwps, calling lwp_yield(), then lwp_exit ... FAILURE.
+        10) Five threads, variable iters, exit from front ... FAILURE.
+        11) Five threads, variable iters, exit from front ... FAILURE.
+        12) Five threads, variable iters, exit from back  ... FAILURE.
+        13) Five threads, AlwaysZero scheduling           ... FAILURE.
+        14) One lwp, yields, and returns                  ... FAILURE.
+        15) Ten lwps, yields, and returns                 ... FAILURE.
+        16) Lwp spawns another then exits 100 times.      ... FAILURE.
+        17) Two Lwps. spawn then exits 50 times.          ... FAILURE.
+        18) 1024 threads, random exit.                    ... FAILURE.
+        19) Ping pong with semaphores                     ... FAILURE.
+        20) Dine with semaphores                          ... FAILURE.
+        21) Transfer threads between schedulers (stopped) ... FAILURE.
+        22) Transfer threads between schedulers (live)    ... FAILURE.
+        23) Transfer threads to same scheduler (live)     ... FAILURE.
+        24) Transfer threads between schedulers check for ... FAILURE.
+        25) Check that Returned TIDs are unique           ... FAILURE.
+        26) Does tid2thread return the right thread?      ... FAILURE.
+        27) Tid2thread() returns NULL given a bad tid?    ... ok.
+        28) Is thread library using sched_one? sched_two? ... FAILURE.
+        -----
+FAILURE. (4/28 passed)
+
+
+----------------------------
+46 Corefile(s) Present:
+    core.3162
+    core.3258
+    core.3329
+    core.3362
+    core.3404
+    core.3448
+    core.3479
+    core.3513
+    core.3545
+    core.3577
+    core.3609
+    core.3640
+    core.3676
+    core.3708
+    core.3741
+    core.3773
+    core.3809
+    core.3847
+    core.3879
+    core.3911
+    core.3943
+    core.3975
+    core.4036
+    core.6709
+    core.6797
+    core.6861
+    core.6893
+    core.6925
+    core.6957
+    core.6989
+    core.7033
+    core.7065
+    core.7097
+    core.7129
+    core.7162
+    core.7194
+    core.7226
+    core.7258
+    core.7290
+    core.7322
+    core.7354
+    core.7386
+    core.7424
+    core.7456
+    core.7494
+    core.7559
+----------------------------
+
+
+-----------------------------------------------------------------
+Failure Details
+-----------------------------------------------------------------
+=================================================
+TEST 2: Create a thread, but don't run it.
+
+----------
+Reference:
+----------
+Well, we didn't crash
+----------
+Submitted:
+----------
+Child process (6709) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1c1
+< Well, we didn't crash
+---
+> Child process (6709) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 5: Check stack frame alignment
+
+----------
+Reference:
+----------
+Stack frame alignment appears correct.
+----------
+Submitted:
+----------
+Child process (6797) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1c1
+< Stack frame alignment appears correct.
+---
+> Child process (6797) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 6: One lwp, calling lwp_yield(), then exit()
+
+This test creates a single thread out of the original thread, yields
+to itself then calls exit().
+
+----------
+Reference:
+----------
+Greetings from the original thread.  Yielding...
+I'm still alive.  Goodbye
+----------
+Submitted:
+----------
+Greetings from the original thread.  Yielding...
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+2d1
+< I'm still alive.  Goodbye
+---------
+=================================================
+TEST 7: One created lwp which calls exit(3), main() lwp_wait()s
+
+This test spawns a single thread that prints a message then calls
+exit.
+
+----------
+Reference:
+----------
+Greetings from Thread 3.  Goodbye
+----------
+Submitted:
+----------
+Child process (6861) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1c1
+< Greetings from Thread 3.  Goodbye
+---
+> Child process (6861) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 8: Five lwps, calling lwp_yield(), then exit()
+
+This test spawns five threads that each print a message and yield.
+The second time through the last one calls exit();
+
+----------
+Reference:
+----------
+Greetings from Thread 0.  Yielding...
+Greetings from Thread 1.  Yielding...
+Greetings from Thread 2.  Yielding...
+Greetings from Thread 3.  Yielding...
+Greetings from Thread 4.  Yielding...
+I (0) am still alive.  Goodbye.
+I (1) am still alive.  Goodbye.
+I (2) am still alive.  Goodbye.
+I (3) am still alive.  Goodbye.
+I (4) am still alive.  Goodbye.
+----------
+Submitted:
+----------
+Child process (6893) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,10c1
+< Greetings from Thread 0.  Yielding...
+< Greetings from Thread 1.  Yielding...
+< Greetings from Thread 2.  Yielding...
+< Greetings from Thread 3.  Yielding...
+< Greetings from Thread 4.  Yielding...
+< I (0) am still alive.  Goodbye.
+< I (1) am still alive.  Goodbye.
+< I (2) am still alive.  Goodbye.
+< I (3) am still alive.  Goodbye.
+< I (4) am still alive.  Goodbye.
+---
+> Child process (6893) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 9: Five lwps, calling lwp_yield(), then lwp_exit()
+
+This test spawns five LWPs, each of which yields once,
+then calls lwp_exit() the second time.
+----------
+Reference:
+----------
+Greetings from Thread 0.  Yielding...
+Greetings from Thread 1.  Yielding...
+Greetings from Thread 2.  Yielding...
+Greetings from Thread 3.  Yielding...
+Greetings from Thread 4.  Yielding...
+I (0) am still alive.  Goodbye.
+I (1) am still alive.  Goodbye.
+I (2) am still alive.  Goodbye.
+I (3) am still alive.  Goodbye.
+I (4) am still alive.  Goodbye.
+LWPs have ended.
+----------
+Submitted:
+----------
+Child process (6925) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,11c1
+< Greetings from Thread 0.  Yielding...
+< Greetings from Thread 1.  Yielding...
+< Greetings from Thread 2.  Yielding...
+< Greetings from Thread 3.  Yielding...
+< Greetings from Thread 4.  Yielding...
+< I (0) am still alive.  Goodbye.
+< I (1) am still alive.  Goodbye.
+< I (2) am still alive.  Goodbye.
+< I (3) am still alive.  Goodbye.
+< I (4) am still alive.  Goodbye.
+< LWPs have ended.
+---
+> Child process (6925) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 10: Five threads, variable iters, exit from front
+
+This is the numbersmain program distributed with the assignment.
+Each thread (1..5) exits after its number of iterations
+
+
+----------
+Reference:
+----------
+Launching LWPS
+    1
+         2
+              3
+                   4
+                        5
+         2
+              3
+                   4
+                        5
+              3
+                   4
+                        5
+                   4
+                        5
+                        5
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (6957) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,17c1
+< Launching LWPS
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<          2
+<               3
+<                    4
+<                         5
+<               3
+<                    4
+<                         5
+<                    4
+<                         5
+<                         5
+< Back from LWPS.
+---
+> Child process (6957) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 11: Five threads, variable iters, exit from front
+
+This is the numbersmain program distributed with the assignment.
+Each thread (1..5) exits after its number of iterations
+
+
+----------
+Reference:
+----------
+Launching LWPS
+    1
+         2
+              3
+                   4
+                        5
+         2
+              3
+                   4
+                        5
+A thread exited with status 1
+              3
+                   4
+                        5
+A thread exited with status 2
+                   4
+                        5
+A thread exited with status 3
+                        5
+A thread exited with status 4
+A thread exited with status 5
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (6989) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,22c1
+< Launching LWPS
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<          2
+<               3
+<                    4
+<                         5
+< A thread exited with status 1
+<               3
+<                    4
+<                         5
+< A thread exited with status 2
+<                    4
+<                         5
+< A thread exited with status 3
+<                         5
+< A thread exited with status 4
+< A thread exited with status 5
+< Back from LWPS.
+---
+> Child process (6989) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 12: Five threads, variable iters, exit from back
+
+This is the numbersmain program distributed with the assignment.
+Each thread (1..5) exits after N minus its number of iterations.
+The effect is to always have the last process call lwp_exit().
+
+
+----------
+Reference:
+----------
+Launching LWPS
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+    1
+         2
+              3
+    1
+         2
+    1
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (7033) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,17c1
+< Launching LWPS
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<     1
+<          2
+<               3
+<     1
+<          2
+<     1
+< Back from LWPS.
+---
+> Child process (7033) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 13: Five threads, AlwaysZero scheduling
+
+This is the numbersmain program distributed with the assignment,
+but with the scheduler changed to always run the head of the queue.
+Each thread (1..5) exits after its number of iterations.
+
+
+----------
+Reference:
+----------
+Launching LWPS
+    1
+         2
+         2
+              3
+              3
+              3
+                   4
+                   4
+                   4
+                   4
+                        5
+                        5
+                        5
+                        5
+                        5
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (7065) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,17c1
+< Launching LWPS
+<     1
+<          2
+<          2
+<               3
+<               3
+<               3
+<                    4
+<                    4
+<                    4
+<                    4
+<                         5
+<                         5
+<                         5
+<                         5
+<                         5
+< Back from LWPS.
+---
+> Child process (7065) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 14: One lwp, yields, and returns
+
+This test spawns a single thread that prints a message, yields
+to itself, then returns
+
+----------
+Reference:
+----------
+Greetings from Thread 0.  Yielding...
+I'm still alive.  Goodbye
+After thread termination
+----------
+Submitted:
+----------
+Child process (7097) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,3c1
+< Greetings from Thread 0.  Yielding...
+< I'm still alive.  Goodbye
+< After thread termination
+---
+> Child process (7097) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 15: Ten lwps, yields, and returns
+
+This test spawns several threads that prints a message, yields
+to itself, then returns
+
+----------
+Reference:
+----------
+Greetings from Thread 0.  Yielding...
+Greetings from Thread 1.  Yielding...
+Greetings from Thread 2.  Yielding...
+Greetings from Thread 3.  Yielding...
+Greetings from Thread 4.  Yielding...
+Greetings from Thread 5.  Yielding...
+Greetings from Thread 6.  Yielding...
+Greetings from Thread 7.  Yielding...
+Greetings from Thread 8.  Yielding...
+Greetings from Thread 9.  Yielding...
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+I'm still alive.  Goodbye
+After thread termination
+----------
+Submitted:
+----------
+Child process (7129) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,21c1
+< Greetings from Thread 0.  Yielding...
+< Greetings from Thread 1.  Yielding...
+< Greetings from Thread 2.  Yielding...
+< Greetings from Thread 3.  Yielding...
+< Greetings from Thread 4.  Yielding...
+< Greetings from Thread 5.  Yielding...
+< Greetings from Thread 6.  Yielding...
+< Greetings from Thread 7.  Yielding...
+< Greetings from Thread 8.  Yielding...
+< Greetings from Thread 9.  Yielding...
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< I'm still alive.  Goodbye
+< After thread termination
+---
+> Child process (7129) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 16: Lwp spawns another then exits 100 times.
+
+One thread creates a new one, then exits.
+
+
+
+----------
+Reference:
+----------
+100
+99
+98
+97
+96
+95
+94
+93
+92
+91
+90
+89
+88
+87
+86
+85
+84
+83
+82
+81
+80
+79
+78
+77
+76
+75
+74
+73
+72
+71
+70
+69
+68
+67
+66
+65
+64
+63
+62
+61
+60
+59
+58
+57
+56
+55
+54
+53
+52
+51
+50
+49
+48
+47
+46
+45
+44
+43
+42
+41
+40
+39
+38
+37
+36
+35
+34
+33
+32
+31
+30
+29
+28
+27
+26
+25
+24
+23
+22
+21
+20
+19
+18
+17
+16
+15
+14
+13
+12
+11
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+Bye
+----------
+Submitted:
+----------
+Child process (7162) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,101c1
+< 100
+< 99
+< 98
+< 97
+< 96
+< 95
+< 94
+< 93
+< 92
+< 91
+< 90
+< 89
+< 88
+< 87
+< 86
+< 85
+< 84
+< 83
+< 82
+< 81
+< 80
+< 79
+< 78
+< 77
+< 76
+< 75
+< 74
+< 73
+< 72
+< 71
+< 70
+< 69
+< 68
+< 67
+< 66
+< 65
+< 64
+< 63
+< 62
+< 61
+< 60
+< 59
+< 58
+< 57
+< 56
+< 55
+< 54
+< 53
+< 52
+< 51
+< 50
+< 49
+< 48
+< 47
+< 46
+< 45
+< 44
+< 43
+< 42
+< 41
+< 40
+< 39
+< 38
+< 37
+< 36
+< 35
+< 34
+< 33
+< 32
+< 31
+< 30
+< 29
+< 28
+< 27
+< 26
+< 25
+< 24
+< 23
+< 22
+< 21
+< 20
+< 19
+< 18
+< 17
+< 16
+< 15
+< 14
+< 13
+< 12
+< 11
+< 10
+< 9
+< 8
+< 7
+< 6
+< 5
+< 4
+< 3
+< 2
+< 1
+< Bye
+---
+> Child process (7162) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 17: Two Lwps. spawn then exits 50 times.
+
+Two threads creates new ones, then exits.
+
+
+
+----------
+Reference:
+----------
+Counter is 50.  Exiting
+Counter is 50.  Exiting
+Counter is 49.  Exiting
+Counter is 49.  Exiting
+Counter is 48.  Exiting
+Counter is 48.  Exiting
+Counter is 47.  Exiting
+Counter is 47.  Exiting
+Counter is 46.  Exiting
+Counter is 46.  Exiting
+Counter is 45.  Exiting
+Counter is 45.  Exiting
+Counter is 44.  Exiting
+Counter is 44.  Exiting
+Counter is 43.  Exiting
+Counter is 43.  Exiting
+Counter is 42.  Exiting
+Counter is 42.  Exiting
+Counter is 41.  Exiting
+Counter is 41.  Exiting
+Counter is 40.  Exiting
+Counter is 40.  Exiting
+Counter is 39.  Exiting
+Counter is 39.  Exiting
+Counter is 38.  Exiting
+Counter is 38.  Exiting
+Counter is 37.  Exiting
+Counter is 37.  Exiting
+Counter is 36.  Exiting
+Counter is 36.  Exiting
+Counter is 35.  Exiting
+Counter is 35.  Exiting
+Counter is 34.  Exiting
+Counter is 34.  Exiting
+Counter is 33.  Exiting
+Counter is 33.  Exiting
+Counter is 32.  Exiting
+Counter is 32.  Exiting
+Counter is 31.  Exiting
+Counter is 31.  Exiting
+Counter is 30.  Exiting
+Counter is 30.  Exiting
+Counter is 29.  Exiting
+Counter is 29.  Exiting
+Counter is 28.  Exiting
+Counter is 28.  Exiting
+Counter is 27.  Exiting
+Counter is 27.  Exiting
+Counter is 26.  Exiting
+Counter is 26.  Exiting
+Counter is 25.  Exiting
+Counter is 25.  Exiting
+Counter is 24.  Exiting
+Counter is 24.  Exiting
+Counter is 23.  Exiting
+Counter is 23.  Exiting
+Counter is 22.  Exiting
+Counter is 22.  Exiting
+Counter is 21.  Exiting
+Counter is 21.  Exiting
+Counter is 20.  Exiting
+Counter is 20.  Exiting
+Counter is 19.  Exiting
+Counter is 19.  Exiting
+Counter is 18.  Exiting
+Counter is 18.  Exiting
+Counter is 17.  Exiting
+Counter is 17.  Exiting
+Counter is 16.  Exiting
+Counter is 16.  Exiting
+Counter is 15.  Exiting
+Counter is 15.  Exiting
+Counter is 14.  Exiting
+Counter is 14.  Exiting
+Counter is 13.  Exiting
+Counter is 13.  Exiting
+Counter is 12.  Exiting
+Counter is 12.  Exiting
+Counter is 11.  Exiting
+Counter is 11.  Exiting
+Counter is 10.  Exiting
+Counter is 10.  Exiting
+Counter is 9.  Exiting
+Counter is 9.  Exiting
+Counter is 8.  Exiting
+Counter is 8.  Exiting
+Counter is 7.  Exiting
+Counter is 7.  Exiting
+Counter is 6.  Exiting
+Counter is 6.  Exiting
+Counter is 5.  Exiting
+Counter is 5.  Exiting
+Counter is 4.  Exiting
+Counter is 4.  Exiting
+Counter is 3.  Exiting
+Counter is 3.  Exiting
+Counter is 2.  Exiting
+Counter is 2.  Exiting
+Counter is 1.  Exiting
+Counter is 1.  Exiting
+Bye
+Bye
+----------
+Submitted:
+----------
+Child process (7194) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,102c1
+< Counter is 50.  Exiting
+< Counter is 50.  Exiting
+< Counter is 49.  Exiting
+< Counter is 49.  Exiting
+< Counter is 48.  Exiting
+< Counter is 48.  Exiting
+< Counter is 47.  Exiting
+< Counter is 47.  Exiting
+< Counter is 46.  Exiting
+< Counter is 46.  Exiting
+< Counter is 45.  Exiting
+< Counter is 45.  Exiting
+< Counter is 44.  Exiting
+< Counter is 44.  Exiting
+< Counter is 43.  Exiting
+< Counter is 43.  Exiting
+< Counter is 42.  Exiting
+< Counter is 42.  Exiting
+< Counter is 41.  Exiting
+< Counter is 41.  Exiting
+< Counter is 40.  Exiting
+< Counter is 40.  Exiting
+< Counter is 39.  Exiting
+< Counter is 39.  Exiting
+< Counter is 38.  Exiting
+< Counter is 38.  Exiting
+< Counter is 37.  Exiting
+< Counter is 37.  Exiting
+< Counter is 36.  Exiting
+< Counter is 36.  Exiting
+< Counter is 35.  Exiting
+< Counter is 35.  Exiting
+< Counter is 34.  Exiting
+< Counter is 34.  Exiting
+< Counter is 33.  Exiting
+< Counter is 33.  Exiting
+< Counter is 32.  Exiting
+< Counter is 32.  Exiting
+< Counter is 31.  Exiting
+< Counter is 31.  Exiting
+< Counter is 30.  Exiting
+< Counter is 30.  Exiting
+< Counter is 29.  Exiting
+< Counter is 29.  Exiting
+< Counter is 28.  Exiting
+< Counter is 28.  Exiting
+< Counter is 27.  Exiting
+< Counter is 27.  Exiting
+< Counter is 26.  Exiting
+< Counter is 26.  Exiting
+< Counter is 25.  Exiting
+< Counter is 25.  Exiting
+< Counter is 24.  Exiting
+< Counter is 24.  Exiting
+< Counter is 23.  Exiting
+< Counter is 23.  Exiting
+< Counter is 22.  Exiting
+< Counter is 22.  Exiting
+< Counter is 21.  Exiting
+< Counter is 21.  Exiting
+< Counter is 20.  Exiting
+< Counter is 20.  Exiting
+< Counter is 19.  Exiting
+< Counter is 19.  Exiting
+< Counter is 18.  Exiting
+< Counter is 18.  Exiting
+< Counter is 17.  Exiting
+< Counter is 17.  Exiting
+< Counter is 16.  Exiting
+< Counter is 16.  Exiting
+< Counter is 15.  Exiting
+< Counter is 15.  Exiting
+< Counter is 14.  Exiting
+< Counter is 14.  Exiting
+< Counter is 13.  Exiting
+< Counter is 13.  Exiting
+< Counter is 12.  Exiting
+< Counter is 12.  Exiting
+< Counter is 11.  Exiting
+< Counter is 11.  Exiting
+< Counter is 10.  Exiting
+< Counter is 10.  Exiting
+< Counter is 9.  Exiting
+< Counter is 9.  Exiting
+< Counter is 8.  Exiting
+< Counter is 8.  Exiting
+< Counter is 7.  Exiting
+< Counter is 7.  Exiting
+< Counter is 6.  Exiting
+< Counter is 6.  Exiting
+< Counter is 5.  Exiting
+< Counter is 5.  Exiting
+< Counter is 4.  Exiting
+< Counter is 4.  Exiting
+< Counter is 3.  Exiting
+< Counter is 3.  Exiting
+< Counter is 2.  Exiting
+< Counter is 2.  Exiting
+< Counter is 1.  Exiting
+< Counter is 1.  Exiting
+< Bye
+< Bye
+---
+> Child process (7194) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 18: 1024 threads, random exit.
+
+Creat 1024 threads, each of which either yields or exits randomly until
+a counter reaches a given value.
+
+
+
+
+----------
+Reference:
+----------
+Spawining 4096 threads.
+Done.  Count is 50000. (Yielded 406869 times)
+----------
+Submitted:
+----------
+Child process (7226) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,2c1
+< Spawining 4096 threads.
+< Done.  Count is 50000. (Yielded 406869 times)
+---
+> Child process (7226) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 19: Ping pong with semaphores
+
+20 threads each of which either Pings or Pongs twice synchronized
+by a scheduler that supports semaphores.
+
+
+
+
+----------
+Reference:
+----------
+Spawining threads. (20)
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+   Ping...pong.
+Done.
+----------
+Submitted:
+----------
+Child process (7258) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,22c1
+< Spawining threads. (20)
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+<    Ping...pong.
+< Done.
+---
+> Child process (7258) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 20: Dine with semaphores
+
+Dining philosophers synchronized by a scheduler that supports
+semaphores.
+
+
+
+
+----------
+Reference:
+----------
+|=============|=============|=============|=============|=============|
+|      A      |      B      |      C      |      D      |      E      |
+|=============|=============|=============|=============|=============|
+| -----       | -----       | -----       | -----       | -----       |
+| -----       | -1---       | -----       | -----       | -----       |
+| -----       | -12--       | -----       | -----       | -----       |
+| -----       | -12-- Eat   | -----       | -----       | -----       |
+| -----       | -12-- Eat   | -----       | ---3-       | -----       |
+| -----       | -12-- Eat   | -----       | ---34       | -----       |
+| -----       | -12-- Eat   | -----       | ---34 Eat   | -----       |
+| -----       | -12-- Eat   | -----       | ---34 Eat   | 0----       |
+| -----       | -12-- Eat   | -----       | ---34       | 0----       |
+| -----       | -12-- Eat   | -----       | ----4       | 0----       |
+| -----       | -12-- Eat   | -----       | -----       | 0----       |
+| -----       | -12-- Eat   | -----       | ----- Think | 0----       |
+| -----       | -12-- Eat   | ---3-       | ----- Think | 0----       |
+| -----       | -12-- Eat   | ---3-       | ----- Think | 0---4       |
+| -----       | -12-- Eat   | ---3-       | ----- Think | 0---4 Eat   |
+| -----       | -12--       | ---3-       | ----- Think | 0---4 Eat   |
+| -----       | --2--       | ---3-       | ----- Think | 0---4 Eat   |
+| -----       | -----       | ---3-       | ----- Think | 0---4 Eat   |
+| -----       | ----- Think | ---3-       | ----- Think | 0---4 Eat   |
+| -1---       | ----- Think | ---3-       | ----- Think | 0---4 Eat   |
+| -1---       | ----- Think | --23-       | ----- Think | 0---4 Eat   |
+| -1---       | ----- Think | --23- Eat   | ----- Think | 0---4 Eat   |
+| -1---       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| -1---       | ----- Think | --23- Eat   | -----       | 0---4       |
+| -1---       | ----- Think | --23- Eat   | -----       | ----4       |
+| -1---       | ----- Think | --23- Eat   | -----       | -----       |
+| -1---       | ----- Think | --23- Eat   | -----       | ----- Think |
+| 01---       | ----- Think | --23- Eat   | -----       | ----- Think |
+| 01--- Eat   | ----- Think | --23- Eat   | -----       | ----- Think |
+| 01--- Eat   | ----- Think | --23- Eat   | -----       | -----       |
+| 01---       | ----- Think | --23- Eat   | -----       | -----       |
+| 0----       | ----- Think | --23- Eat   | -----       | -----       |
+| -----       | ----- Think | --23- Eat   | -----       | -----       |
+| ----- Think | ----- Think | --23- Eat   | -----       | -----       |
+| ----- Think | ----- Think | --23- Eat   | -----       | 0----       |
+| ----- Think | ----- Think | --23- Eat   | -----       | 0---4       |
+| ----- Think | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | --23-       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | --2--       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | -----       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | ----- Think | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+| ----- Think | -----       | ----- Think | ---3-       | 0---4 Eat   |
+| ----- Think | -1---       | ----- Think | ---3-       | 0---4 Eat   |
+| ----- Think | -12--       | ----- Think | ---3-       | 0---4 Eat   |
+| ----- Think | -12-- Eat   | ----- Think | ---3-       | 0---4 Eat   |
+| -----       | -12-- Eat   | ----- Think | ---3-       | 0---4 Eat   |
+| -----       | -12--       | ----- Think | ---3-       | 0---4 Eat   |
+| -----       | --2--       | ----- Think | ---3-       | 0---4 Eat   |
+| -----       | -----       | ----- Think | ---3-       | 0---4 Eat   |
+| -----       | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+| -1---       | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+| -1---       | ----- Think | -----       | ---3-       | 0---4 Eat   |
+| -1---       | -----       | -----       | ---3-       | 0---4 Eat   |
+| -1---       | -----       | -----       | ---3-       | 0---4       |
+| -1---       | -----       | -----       | ---3-       | ----4       |
+| -1---       | -----       | -----       | ---3-       | -----       |
+| -1---       | -----       | -----       | ---3-       | ----- Think |
+| 01---       | -----       | -----       | ---3-       | ----- Think |
+| 01--- Eat   | -----       | -----       | ---3-       | ----- Think |
+| 01--- Eat   | -----       | -----       | ---34       | ----- Think |
+| 01--- Eat   | -----       | -----       | ---34 Eat   | ----- Think |
+| 01---       | -----       | -----       | ---34 Eat   | ----- Think |
+| 0----       | -----       | -----       | ---34 Eat   | ----- Think |
+| -----       | -----       | -----       | ---34 Eat   | ----- Think |
+| ----- Think | -----       | -----       | ---34 Eat   | ----- Think |
+| ----- Think | -1---       | -----       | ---34 Eat   | ----- Think |
+| ----- Think | -12--       | -----       | ---34 Eat   | ----- Think |
+| ----- Think | -12-- Eat   | -----       | ---34 Eat   | ----- Think |
+| ----- Think | -12-- Eat   | -----       | ---34       | ----- Think |
+| ----- Think | -12-- Eat   | -----       | ----4       | ----- Think |
+| ----- Think | -12-- Eat   | -----       | -----       | ----- Think |
+| ----- Think | -12-- Eat   | -----       | ----- Think | ----- Think |
+| ----- Think | -12-- Eat   | ---3-       | ----- Think | ----- Think |
+| ----- Think | -12-- Eat   | ---3-       | -----       | ----- Think |
+| ----- Think | -12-- Eat   | ---3-       | -----       | -----       |
+| ----- Think | -12-- Eat   | ---3-       | -----       | 0----       |
+| ----- Think | -12-- Eat   | ---3-       | -----       | 0---4       |
+| ----- Think | -12-- Eat   | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | -12--       | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | --2--       | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | -----       | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | --23-       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| -----       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| -1---       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| -1---       | ----- Think | --23-       | -----       | 0---4 Eat   |
+| -1---       | ----- Think | --2--       | -----       | 0---4 Eat   |
+| -1---       | ----- Think | -----       | -----       | 0---4 Eat   |
+| -1---       | ----- Think | ----- Think | -----       | 0---4 Eat   |
+| -1---       | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+| -1---       | -----       | ----- Think | ---3-       | 0---4 Eat   |
+| -1---       | -----       | ----- Think | ---3-       | 0---4       |
+| -1---       | -----       | ----- Think | ---3-       | ----4       |
+| -1---       | -----       | ----- Think | ---3-       | -----       |
+| -1---       | -----       | ----- Think | ---3-       | ----- Think |
+| -1---       | -----       | ----- Think | ---34       | ----- Think |
+| -1---       | -----       | ----- Think | ---34 Eat   | ----- Think |
+| 01---       | -----       | ----- Think | ---34 Eat   | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34 Eat   | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ----4       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | -----       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ----- Think | ----- Think |
+| 01--- Eat   | -----       | -----       | ----- Think | ----- Think |
+| 01--- Eat   | -----       | ---3-       | ----- Think | ----- Think |
+| 01--- Eat   | -----       | --23-       | ----- Think | ----- Think |
+| 01--- Eat   | -----       | --23- Eat   | ----- Think | ----- Think |
+| 01--- Eat   | -----       | --23-       | ----- Think | ----- Think |
+| 01--- Eat   | -----       | --2--       | ----- Think | ----- Think |
+| 01--- Eat   | -----       | -----       | ----- Think | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ----- Think | ----- Think |
+| 01--- Eat   | -----       | ----- Think | -----       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---3-       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34 Eat   | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34 Eat   | -----       |
+| 01--- Eat   | -----       | -----       | ---34 Eat   | -----       |
+| 01--- Eat   | -----       | -----       | ---34       | -----       |
+| 01--- Eat   | -----       | -----       | ----4       | -----       |
+| 01--- Eat   | -----       | -----       | -----       | -----       |
+| 01--- Eat   | -----       | -----       | ----- Think | -----       |
+| 01--- Eat   | -----       | ---3-       | ----- Think | -----       |
+| 01--- Eat   | -----       | --23-       | ----- Think | -----       |
+| 01--- Eat   | -----       | --23- Eat   | ----- Think | -----       |
+| 01--- Eat   | -----       | --23-       | ----- Think | -----       |
+| 01--- Eat   | -----       | --2--       | ----- Think | -----       |
+| 01--- Eat   | -----       | -----       | ----- Think | -----       |
+| 01--- Eat   | -----       | ----- Think | ----- Think | -----       |
+| 01---       | -----       | ----- Think | ----- Think | -----       |
+| 0----       | -----       | ----- Think | ----- Think | -----       |
+| -----       | -----       | ----- Think | ----- Think | -----       |
+| ----- Think | -----       | ----- Think | ----- Think | -----       |
+| ----- Think | -----       | ----- Think | ----- Think | 0----       |
+| ----- Think | -1---       | ----- Think | ----- Think | 0----       |
+| ----- Think | -1---       | ----- Think | ----- Think | 0---4       |
+| ----- Think | -1---       | ----- Think | ----- Think | 0---4 Eat   |
+| ----- Think | -12--       | ----- Think | ----- Think | 0---4 Eat   |
+| ----- Think | -12-- Eat   | ----- Think | ----- Think | 0---4 Eat   |
+| ----- Think | -12-- Eat   | -----       | ----- Think | 0---4 Eat   |
+| ----- Think | -12-- Eat   | ---3-       | ----- Think | 0---4 Eat   |
+| ----- Think | -12-- Eat   | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | -12--       | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | --2--       | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | -----       | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | ---3-       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | --23-       | -----       | 0---4 Eat   |
+| ----- Think | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| -----       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| -1---       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+| -1---       | ----- Think | --23- Eat   | -----       | 0---4       |
+| -1---       | ----- Think | --23- Eat   | -----       | ----4       |
+| -1---       | ----- Think | --23- Eat   | -----       | -----       |
+| -1---       | ----- Think | --23- Eat   | -----       | ----- Think |
+| 01---       | ----- Think | --23- Eat   | -----       | ----- Think |
+| 01--- Eat   | ----- Think | --23- Eat   | -----       | ----- Think |
+| 01--- Eat   | -----       | --23- Eat   | -----       | ----- Think |
+| 01--- Eat   | -----       | --23-       | -----       | ----- Think |
+| 01--- Eat   | -----       | --2--       | -----       | ----- Think |
+| 01--- Eat   | -----       | -----       | -----       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | -----       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---3-       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34       | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34 Eat   | ----- Think |
+| 01--- Eat   | -----       | ----- Think | ---34 Eat   | -----       |
+| 01--- Eat   | -----       | -----       | ---34 Eat   | -----       |
+| 01---       | -----       | -----       | ---34 Eat   | -----       |
+| 0----       | -----       | -----       | ---34 Eat   | -----       |
+| -----       | -----       | -----       | ---34 Eat   | -----       |
+| ----- Think | -----       | -----       | ---34 Eat   | -----       |
+| ----- Think | -----       | -----       | ---34 Eat   | 0----       |
+| ----- Think | -1---       | -----       | ---34 Eat   | 0----       |
+| ----- Think | -12--       | -----       | ---34 Eat   | 0----       |
+| ----- Think | -12-- Eat   | -----       | ---34 Eat   | 0----       |
+| ----- Think | -12-- Eat   | -----       | ---34       | 0----       |
+| ----- Think | -12-- Eat   | -----       | ----4       | 0----       |
+| ----- Think | -12-- Eat   | -----       | -----       | 0----       |
+| ----- Think | -12-- Eat   | -----       | ----- Think | 0----       |
+| ----- Think | -12-- Eat   | -----       | ----- Think | 0---4       |
+| ----- Think | -12-- Eat   | -----       | ----- Think | 0---4 Eat   |
+| ----- Think | -12--       | -----       | ----- Think | 0---4 Eat   |
+| ----- Think | --2--       | -----       | ----- Think | 0---4 Eat   |
+| ----- Think | -----       | -----       | ----- Think | 0---4 Eat   |
+| ----- Think | ----- Think | -----       | ----- Think | 0---4 Eat   |
+| ----- Think | ----- Think | -----       | -----       | 0---4 Eat   |
+| ----- Think | -----       | -----       | -----       | 0---4 Eat   |
+| -----       | -----       | -----       | -----       | 0---4 Eat   |
+| -1---       | -----       | -----       | -----       | 0---4 Eat   |
+| -1---       | -----       | -----       | -----       | 0---4       |
+| -1---       | -----       | -----       | -----       | ----4       |
+| -1---       | -----       | -----       | -----       | -----       |
+| -1---       | -----       | -----       | -----       | ----- Think |
+| 01---       | -----       | -----       | -----       | ----- Think |
+| 01--- Eat   | -----       | -----       | -----       | ----- Think |
+| 01--- Eat   | -----       | -----       | -----       | -----       |
+| 01---       | -----       | -----       | -----       | -----       |
+| 0----       | -----       | -----       | -----       | -----       |
+| -----       | -----       | -----       | -----       | -----       |
+| ----- Think | -----       | -----       | -----       | -----       |
+| -----       | -----       | -----       | -----       | -----       |
+|=============|=============|=============|=============|=============|
+----------
+Submitted:
+----------
+Child process (7290) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,205c1
+< |=============|=============|=============|=============|=============|
+< |      A      |      B      |      C      |      D      |      E      |
+< |=============|=============|=============|=============|=============|
+< | -----       | -----       | -----       | -----       | -----       |
+< | -----       | -1---       | -----       | -----       | -----       |
+< | -----       | -12--       | -----       | -----       | -----       |
+< | -----       | -12-- Eat   | -----       | -----       | -----       |
+< | -----       | -12-- Eat   | -----       | ---3-       | -----       |
+< | -----       | -12-- Eat   | -----       | ---34       | -----       |
+< | -----       | -12-- Eat   | -----       | ---34 Eat   | -----       |
+< | -----       | -12-- Eat   | -----       | ---34 Eat   | 0----       |
+< | -----       | -12-- Eat   | -----       | ---34       | 0----       |
+< | -----       | -12-- Eat   | -----       | ----4       | 0----       |
+< | -----       | -12-- Eat   | -----       | -----       | 0----       |
+< | -----       | -12-- Eat   | -----       | ----- Think | 0----       |
+< | -----       | -12-- Eat   | ---3-       | ----- Think | 0----       |
+< | -----       | -12-- Eat   | ---3-       | ----- Think | 0---4       |
+< | -----       | -12-- Eat   | ---3-       | ----- Think | 0---4 Eat   |
+< | -----       | -12--       | ---3-       | ----- Think | 0---4 Eat   |
+< | -----       | --2--       | ---3-       | ----- Think | 0---4 Eat   |
+< | -----       | -----       | ---3-       | ----- Think | 0---4 Eat   |
+< | -----       | ----- Think | ---3-       | ----- Think | 0---4 Eat   |
+< | -1---       | ----- Think | ---3-       | ----- Think | 0---4 Eat   |
+< | -1---       | ----- Think | --23-       | ----- Think | 0---4 Eat   |
+< | -1---       | ----- Think | --23- Eat   | ----- Think | 0---4 Eat   |
+< | -1---       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | --23- Eat   | -----       | 0---4       |
+< | -1---       | ----- Think | --23- Eat   | -----       | ----4       |
+< | -1---       | ----- Think | --23- Eat   | -----       | -----       |
+< | -1---       | ----- Think | --23- Eat   | -----       | ----- Think |
+< | 01---       | ----- Think | --23- Eat   | -----       | ----- Think |
+< | 01--- Eat   | ----- Think | --23- Eat   | -----       | ----- Think |
+< | 01--- Eat   | ----- Think | --23- Eat   | -----       | -----       |
+< | 01---       | ----- Think | --23- Eat   | -----       | -----       |
+< | 0----       | ----- Think | --23- Eat   | -----       | -----       |
+< | -----       | ----- Think | --23- Eat   | -----       | -----       |
+< | ----- Think | ----- Think | --23- Eat   | -----       | -----       |
+< | ----- Think | ----- Think | --23- Eat   | -----       | 0----       |
+< | ----- Think | ----- Think | --23- Eat   | -----       | 0---4       |
+< | ----- Think | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | --23-       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | --2--       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | -----       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | ----- Think | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+< | ----- Think | -----       | ----- Think | ---3-       | 0---4 Eat   |
+< | ----- Think | -1---       | ----- Think | ---3-       | 0---4 Eat   |
+< | ----- Think | -12--       | ----- Think | ---3-       | 0---4 Eat   |
+< | ----- Think | -12-- Eat   | ----- Think | ---3-       | 0---4 Eat   |
+< | -----       | -12-- Eat   | ----- Think | ---3-       | 0---4 Eat   |
+< | -----       | -12--       | ----- Think | ---3-       | 0---4 Eat   |
+< | -----       | --2--       | ----- Think | ---3-       | 0---4 Eat   |
+< | -----       | -----       | ----- Think | ---3-       | 0---4 Eat   |
+< | -----       | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+< | -1---       | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+< | -1---       | ----- Think | -----       | ---3-       | 0---4 Eat   |
+< | -1---       | -----       | -----       | ---3-       | 0---4 Eat   |
+< | -1---       | -----       | -----       | ---3-       | 0---4       |
+< | -1---       | -----       | -----       | ---3-       | ----4       |
+< | -1---       | -----       | -----       | ---3-       | -----       |
+< | -1---       | -----       | -----       | ---3-       | ----- Think |
+< | 01---       | -----       | -----       | ---3-       | ----- Think |
+< | 01--- Eat   | -----       | -----       | ---3-       | ----- Think |
+< | 01--- Eat   | -----       | -----       | ---34       | ----- Think |
+< | 01--- Eat   | -----       | -----       | ---34 Eat   | ----- Think |
+< | 01---       | -----       | -----       | ---34 Eat   | ----- Think |
+< | 0----       | -----       | -----       | ---34 Eat   | ----- Think |
+< | -----       | -----       | -----       | ---34 Eat   | ----- Think |
+< | ----- Think | -----       | -----       | ---34 Eat   | ----- Think |
+< | ----- Think | -1---       | -----       | ---34 Eat   | ----- Think |
+< | ----- Think | -12--       | -----       | ---34 Eat   | ----- Think |
+< | ----- Think | -12-- Eat   | -----       | ---34 Eat   | ----- Think |
+< | ----- Think | -12-- Eat   | -----       | ---34       | ----- Think |
+< | ----- Think | -12-- Eat   | -----       | ----4       | ----- Think |
+< | ----- Think | -12-- Eat   | -----       | -----       | ----- Think |
+< | ----- Think | -12-- Eat   | -----       | ----- Think | ----- Think |
+< | ----- Think | -12-- Eat   | ---3-       | ----- Think | ----- Think |
+< | ----- Think | -12-- Eat   | ---3-       | -----       | ----- Think |
+< | ----- Think | -12-- Eat   | ---3-       | -----       | -----       |
+< | ----- Think | -12-- Eat   | ---3-       | -----       | 0----       |
+< | ----- Think | -12-- Eat   | ---3-       | -----       | 0---4       |
+< | ----- Think | -12-- Eat   | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | -12--       | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | --2--       | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | -----       | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | --23-       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | -----       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | --23-       | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | --2--       | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | -----       | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | ----- Think | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | ----- Think | ---3-       | 0---4 Eat   |
+< | -1---       | -----       | ----- Think | ---3-       | 0---4 Eat   |
+< | -1---       | -----       | ----- Think | ---3-       | 0---4       |
+< | -1---       | -----       | ----- Think | ---3-       | ----4       |
+< | -1---       | -----       | ----- Think | ---3-       | -----       |
+< | -1---       | -----       | ----- Think | ---3-       | ----- Think |
+< | -1---       | -----       | ----- Think | ---34       | ----- Think |
+< | -1---       | -----       | ----- Think | ---34 Eat   | ----- Think |
+< | 01---       | -----       | ----- Think | ---34 Eat   | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34 Eat   | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ----4       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | -----       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | -----       | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | ---3-       | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | --23-       | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | --23- Eat   | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | --23-       | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | --2--       | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | -----       | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ----- Think | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | -----       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---3-       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34 Eat   | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34 Eat   | -----       |
+< | 01--- Eat   | -----       | -----       | ---34 Eat   | -----       |
+< | 01--- Eat   | -----       | -----       | ---34       | -----       |
+< | 01--- Eat   | -----       | -----       | ----4       | -----       |
+< | 01--- Eat   | -----       | -----       | -----       | -----       |
+< | 01--- Eat   | -----       | -----       | ----- Think | -----       |
+< | 01--- Eat   | -----       | ---3-       | ----- Think | -----       |
+< | 01--- Eat   | -----       | --23-       | ----- Think | -----       |
+< | 01--- Eat   | -----       | --23- Eat   | ----- Think | -----       |
+< | 01--- Eat   | -----       | --23-       | ----- Think | -----       |
+< | 01--- Eat   | -----       | --2--       | ----- Think | -----       |
+< | 01--- Eat   | -----       | -----       | ----- Think | -----       |
+< | 01--- Eat   | -----       | ----- Think | ----- Think | -----       |
+< | 01---       | -----       | ----- Think | ----- Think | -----       |
+< | 0----       | -----       | ----- Think | ----- Think | -----       |
+< | -----       | -----       | ----- Think | ----- Think | -----       |
+< | ----- Think | -----       | ----- Think | ----- Think | -----       |
+< | ----- Think | -----       | ----- Think | ----- Think | 0----       |
+< | ----- Think | -1---       | ----- Think | ----- Think | 0----       |
+< | ----- Think | -1---       | ----- Think | ----- Think | 0---4       |
+< | ----- Think | -1---       | ----- Think | ----- Think | 0---4 Eat   |
+< | ----- Think | -12--       | ----- Think | ----- Think | 0---4 Eat   |
+< | ----- Think | -12-- Eat   | ----- Think | ----- Think | 0---4 Eat   |
+< | ----- Think | -12-- Eat   | -----       | ----- Think | 0---4 Eat   |
+< | ----- Think | -12-- Eat   | ---3-       | ----- Think | 0---4 Eat   |
+< | ----- Think | -12-- Eat   | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | -12--       | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | --2--       | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | -----       | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | ---3-       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | --23-       | -----       | 0---4 Eat   |
+< | ----- Think | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | -----       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | --23- Eat   | -----       | 0---4 Eat   |
+< | -1---       | ----- Think | --23- Eat   | -----       | 0---4       |
+< | -1---       | ----- Think | --23- Eat   | -----       | ----4       |
+< | -1---       | ----- Think | --23- Eat   | -----       | -----       |
+< | -1---       | ----- Think | --23- Eat   | -----       | ----- Think |
+< | 01---       | ----- Think | --23- Eat   | -----       | ----- Think |
+< | 01--- Eat   | ----- Think | --23- Eat   | -----       | ----- Think |
+< | 01--- Eat   | -----       | --23- Eat   | -----       | ----- Think |
+< | 01--- Eat   | -----       | --23-       | -----       | ----- Think |
+< | 01--- Eat   | -----       | --2--       | -----       | ----- Think |
+< | 01--- Eat   | -----       | -----       | -----       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | -----       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---3-       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34       | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34 Eat   | ----- Think |
+< | 01--- Eat   | -----       | ----- Think | ---34 Eat   | -----       |
+< | 01--- Eat   | -----       | -----       | ---34 Eat   | -----       |
+< | 01---       | -----       | -----       | ---34 Eat   | -----       |
+< | 0----       | -----       | -----       | ---34 Eat   | -----       |
+< | -----       | -----       | -----       | ---34 Eat   | -----       |
+< | ----- Think | -----       | -----       | ---34 Eat   | -----       |
+< | ----- Think | -----       | -----       | ---34 Eat   | 0----       |
+< | ----- Think | -1---       | -----       | ---34 Eat   | 0----       |
+< | ----- Think | -12--       | -----       | ---34 Eat   | 0----       |
+< | ----- Think | -12-- Eat   | -----       | ---34 Eat   | 0----       |
+< | ----- Think | -12-- Eat   | -----       | ---34       | 0----       |
+< | ----- Think | -12-- Eat   | -----       | ----4       | 0----       |
+< | ----- Think | -12-- Eat   | -----       | -----       | 0----       |
+< | ----- Think | -12-- Eat   | -----       | ----- Think | 0----       |
+< | ----- Think | -12-- Eat   | -----       | ----- Think | 0---4       |
+< | ----- Think | -12-- Eat   | -----       | ----- Think | 0---4 Eat   |
+< | ----- Think | -12--       | -----       | ----- Think | 0---4 Eat   |
+< | ----- Think | --2--       | -----       | ----- Think | 0---4 Eat   |
+< | ----- Think | -----       | -----       | ----- Think | 0---4 Eat   |
+< | ----- Think | ----- Think | -----       | ----- Think | 0---4 Eat   |
+< | ----- Think | ----- Think | -----       | -----       | 0---4 Eat   |
+< | ----- Think | -----       | -----       | -----       | 0---4 Eat   |
+< | -----       | -----       | -----       | -----       | 0---4 Eat   |
+< | -1---       | -----       | -----       | -----       | 0---4 Eat   |
+< | -1---       | -----       | -----       | -----       | 0---4       |
+< | -1---       | -----       | -----       | -----       | ----4       |
+< | -1---       | -----       | -----       | -----       | -----       |
+< | -1---       | -----       | -----       | -----       | ----- Think |
+< | 01---       | -----       | -----       | -----       | ----- Think |
+< | 01--- Eat   | -----       | -----       | -----       | ----- Think |
+< | 01--- Eat   | -----       | -----       | -----       | -----       |
+< | 01---       | -----       | -----       | -----       | -----       |
+< | 0----       | -----       | -----       | -----       | -----       |
+< | -----       | -----       | -----       | -----       | -----       |
+< | ----- Think | -----       | -----       | -----       | -----       |
+< | -----       | -----       | -----       | -----       | -----       |
+< |=============|=============|=============|=============|=============|
+---
+> Child process (7290) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 21: Transfer threads between schedulers (stopped)
+
+Create a number of threads, then set_scheduler() and see if 
+they transfer properly.
+
+
+
+
+
+----------
+Reference:
+----------
+Creating LWPS
+Setting the scheduler.
+Launching LWPS
+    1
+         2
+              3
+                   4
+                        5
+         2
+              3
+                   4
+                        5
+              3
+                   4
+                        5
+                   4
+                        5
+                        5
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (7322) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,19c1
+< Creating LWPS
+< Setting the scheduler.
+< Launching LWPS
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<          2
+<               3
+<                    4
+<                         5
+<               3
+<                    4
+<                         5
+<                    4
+<                         5
+<                         5
+< Back from LWPS.
+---
+> Child process (7322) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 22: Transfer threads between schedulers (live)
+
+Create a number of threads, start them running,
+then set_scheduler() and see if they transfer properly.
+
+
+
+
+
+----------
+Reference:
+----------
+Creating LWPS
+Launching LWPS
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+Setting the scheduler.
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (7354) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,34c1
+< Creating LWPS
+< Launching LWPS
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+< Setting the scheduler.
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+< Back from LWPS.
+---
+> Child process (7354) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 23: Transfer threads to same scheduler (live)
+
+Create a number of threads, start them running,
+then set_scheduler() to the currently installed
+scheduler.
+
+
+
+
+
+----------
+Reference:
+----------
+Setting Scheduler
+Creating LWPS
+Launching LWPS
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+Setting the scheduler to itself.
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+    1
+         2
+              3
+                   4
+                        5
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (7386) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,35c1
+< Setting Scheduler
+< Creating LWPS
+< Launching LWPS
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+< Setting the scheduler to itself.
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+<     1
+<          2
+<               3
+<                    4
+<                         5
+< Back from LWPS.
+---
+> Child process (7386) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 24: Transfer threads between schedulers check for init/shutdown
+
+Create a number of threads, start them running,
+then set_scheduler() and see if they transfer properly.
+
+
+
+
+
+----------
+Reference:
+----------
+init: called on first scheduler
+Creating LWPS
+Admitting new thread to First scheduler
+Admitting new thread to First scheduler
+Admitting new thread to First scheduler
+Admitting new thread to First scheduler
+Admitting new thread to First scheduler
+Launching LWPS
+Admitting new thread to First scheduler
+(first->next())
+    1
+(first->next())
+         2
+(first->next())
+              3
+(first->next())
+                   4
+(first->next())
+                        5
+(first->next())
+Removing thread from First scheduler
+(first->next())
+    1
+(first->next())
+         2
+(first->next())
+              3
+(first->next())
+                   4
+(first->next())
+                        5
+(first->next())
+    1
+(first->next())
+         2
+(first->next())
+              3
+(first->next())
+                   4
+(first->next())
+                        5
+Setting the scheduler.
+init: called on second scheduler
+(first->next())
+Removing thread from First scheduler
+Admitting new thread to Second scheduler
+(first->next())
+Removing thread from First scheduler
+Admitting new thread to Second scheduler
+(first->next())
+Removing thread from First scheduler
+Admitting new thread to Second scheduler
+(first->next())
+Removing thread from First scheduler
+Admitting new thread to Second scheduler
+(first->next())
+Removing thread from First scheduler
+Admitting new thread to Second scheduler
+(first->next())
+shutdown: called on first scheduler
+(second->next())
+    1
+(second->next())
+         2
+(second->next())
+              3
+(second->next())
+                   4
+(second->next())
+                        5
+(second->next())
+    1
+(second->next())
+         2
+(second->next())
+              3
+(second->next())
+                   4
+(second->next())
+                        5
+(second->next())
+    1
+(second->next())
+         2
+(second->next())
+              3
+(second->next())
+                   4
+(second->next())
+                        5
+(second->next())
+Removing thread from Second scheduler
+Admitting new thread to Second scheduler
+(second->next())
+Removing thread from Second scheduler
+(second->next())
+Removing thread from Second scheduler
+(second->next())
+Removing thread from Second scheduler
+(second->next())
+Removing thread from Second scheduler
+(second->next())
+Removing thread from Second scheduler
+Admitting new thread to Second scheduler
+(second->next())
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (7424) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,106c1
+< init: called on first scheduler
+< Creating LWPS
+< Admitting new thread to First scheduler
+< Admitting new thread to First scheduler
+< Admitting new thread to First scheduler
+< Admitting new thread to First scheduler
+< Admitting new thread to First scheduler
+< Launching LWPS
+< Admitting new thread to First scheduler
+< (first->next())
+<     1
+< (first->next())
+<          2
+< (first->next())
+<               3
+< (first->next())
+<                    4
+< (first->next())
+<                         5
+< (first->next())
+< Removing thread from First scheduler
+< (first->next())
+<     1
+< (first->next())
+<          2
+< (first->next())
+<               3
+< (first->next())
+<                    4
+< (first->next())
+<                         5
+< (first->next())
+<     1
+< (first->next())
+<          2
+< (first->next())
+<               3
+< (first->next())
+<                    4
+< (first->next())
+<                         5
+< Setting the scheduler.
+< init: called on second scheduler
+< (first->next())
+< Removing thread from First scheduler
+< Admitting new thread to Second scheduler
+< (first->next())
+< Removing thread from First scheduler
+< Admitting new thread to Second scheduler
+< (first->next())
+< Removing thread from First scheduler
+< Admitting new thread to Second scheduler
+< (first->next())
+< Removing thread from First scheduler
+< Admitting new thread to Second scheduler
+< (first->next())
+< Removing thread from First scheduler
+< Admitting new thread to Second scheduler
+< (first->next())
+< shutdown: called on first scheduler
+< (second->next())
+<     1
+< (second->next())
+<          2
+< (second->next())
+<               3
+< (second->next())
+<                    4
+< (second->next())
+<                         5
+< (second->next())
+<     1
+< (second->next())
+<          2
+< (second->next())
+<               3
+< (second->next())
+<                    4
+< (second->next())
+<                         5
+< (second->next())
+<     1
+< (second->next())
+<          2
+< (second->next())
+<               3
+< (second->next())
+<                    4
+< (second->next())
+<                         5
+< (second->next())
+< Removing thread from Second scheduler
+< Admitting new thread to Second scheduler
+< (second->next())
+< Removing thread from Second scheduler
+< (second->next())
+< Removing thread from Second scheduler
+< (second->next())
+< Removing thread from Second scheduler
+< (second->next())
+< Removing thread from Second scheduler
+< (second->next())
+< Removing thread from Second scheduler
+< Admitting new thread to Second scheduler
+< (second->next())
+< Back from LWPS.
+---
+> Child process (7424) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 25: Check that Returned TIDs are unique
+
+Spawn a mess (1000) threads and check that none of them have duplicate
+thread IDs
+
+
+
+
+
+----------
+Reference:
+----------
+Creating LWPS
+----------
+Submitted:
+----------
+Child process (7456) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1c1
+< Creating LWPS
+---
+> Child process (7456) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 26: Does tid2thread return the right thread?
+
+This is the similar numbersmain program distributed with the
+assignment, but with a scheduler that returns a random thread.
+(seeded, so reproducible).  After 50 iterations, the last thread runs
+through the list of all threads and sees if tid2thread is returning
+the right context.
+
+
+
+----------
+Reference:
+----------
+Launching LWPS
+                   4
+    1
+                                       8
+                   4
+         2
+              3
+                             6
+              3
+                   4
+                                            9
+                   4
+                                            9
+                                  7
+              3
+                                  7
+                   4
+                   4
+         2
+              3
+         2
+    1
+                                  7
+                   4
+              3
+         2
+    1
+                        5
+                             6
+                                  7
+              3
+              3
+              3
+                             6
+         2
+                        5
+                             6
+                   4
+                                       8
+                             6
+              3
+              3
+              3
+                        5
+    1
+                        5
+    1
+              3
+                        5
+                                       8
+    1
+         2
+              3
+         2
+    1
+    1
+                             6
+         2
+                             6
+    1
+                                  7
+                                  7
+              3
+                                            9
+         2
+    1
+                                       8
+         2
+                             6
+                                       8
+                                       8
+                                       8
+                                       8
+                                       8
+    1
+                                  7
+                                            9
+                        5
+         2
+                                  7
+                        5
+         2
+                                       8
+                                  7
+              3
+                             6
+              3
+                        5
+                   4
+                        5
+         2
+                                       8
+                                  7
+                                  7
+                                       8
+                                            9
+                                  7
+                                  7
+    1
+              3
+              3
+                   4
+                             6
+                                  7
+                             6
+                                            9
+                        5
+                                  7
+                   4
+                   4
+         2
+                   4
+         2
+                   4
+              3
+                   4
+    1
+                             6
+                                  7
+              3
+                                  7
+                   4
+                   4
+                                       8
+                        5
+                                  7
+    1
+              3
+              3
+                                  7
+    1
+                                       8
+                   4
+                                  7
+                   4
+                                            9
+                   4
+                             6
+         2
+                   4
+                        5
+                                       8
+    1
+                                            9
+              3
+                        5
+                        5
+                        5
+              3
+                        5
+                                            9
+              3
+                                            9
+         2
+                                  7
+                                       8
+    1
+                                  7
+         2
+                   4
+                             6
+                   4
+              3
+                                       8
+                                            9
+                        5
+                             6
+    1
+                                            9
+                   4
+    1
+                                       8
+                   4
+              3
+                                            9
+                                            9
+                                       8
+              3
+              3
+    1
+                        5
+                                  7
+                             6
+                                  7
+              3
+                        5
+                                       8
+                             6
+                        5
+              3
+         2
+              3
+                             6
+                   4
+                                            9
+         2
+                        5
+         2
+                                       8
+                                       8
+    1
+         2
+                                            9
+                                  7
+                             6
+                                       8
+                   4
+         2
+                                            9
+                   4
+                                  7
+                                  7
+                   4
+                   4
+                             6
+                             6
+                                       8
+         2
+                                       8
+    1
+                                            9
+                        5
+                             6
+                                       8
+                                            9
+                             6
+                                       8
+    1
+              3
+    1
+                   4
+                             6
+              3
+         2
+                                            9
+              3
+              3
+                                  7
+                                            9
+                        5
+                   4
+                                  7
+              3
+                             6
+    1
+                             6
+    1
+                        5
+                   4
+                        5
+         2
+                                            9
+                   4
+    1
+                                       8
+                   4
+                                  7
+                             6
+                   4
+                                  7
+                   4
+              3
+                                       8
+                                            9
+                             6
+                                       8
+                   4
+    1
+                                  7
+              3
+              3
+                             6
+                        5
+    1
+                                  7
+                                       8
+    1
+                                            9
+                             6
+                        5
+                        5
+                             6
+                   4
+                             6
+                   4
+                                  7
+                        5
+                                  7
+                                            9
+                   4
+                                  7
+                   4
+                        5
+                        5
+                   4
+         2
+                   4
+                             6
+                                       8
+                        5
+              3
+                        5
+                        5
+         2
+                                       8
+              3
+                                            9
+                             6
+    1
+                   4
+                                            9
+         2
+                             6
+                                  7
+    1
+                   4
+                                            9
+                                       8
+         2
+                                  7
+    1
+                                  7
+                                       8
+         2
+                             6
+                   4
+              3
+                                  7
+                                  7
+                                            9
+    1
+                                       8
+    1
+                                            9
+         2
+                                       8
+    1
+                                            9
+              3
+                                  7
+                                  7
+                        5
+                                            9
+                        5
+                   4
+         2
+                                       8
+    1
+                                       8
+                                       8
+                                  7
+                             6
+    1
+    1
+              3
+    1
+                                       8
+    1
+              3
+                                       8
+    1
+              3
+                             6
+                                       8
+                                  7
+    1
+    1
+         2
+                        5
+                             6
+         2
+              3
+         2
+    1
+                                  7
+                             6
+              3
+                   4
+                        5
+                                            9
+                                       8
+                             6
+    1
+                        5
+    1
+                        5
+                                  7
+                                       8
+              3
+                        5
+         2
+                                       8
+         2
+                                            9
+         2
+                   4
+         2
+                        5
+                                       8
+                        5
+                                            9
+                                  7
+                                            9
+                        5
+                        5
+                             6
+                             6
+                        5
+    1
+                                  7
+                                  7
+                                            9
+         2
+    1
+                                       8
+                             6
+         2
+                                       8
+                        5
+    1
+                                            9
+                                       8
+                             6
+                        5
+                        5
+                        5
+         2
+         2
+         2
+                             6
+                             6
+         2
+                             6
+         2
+                                            9
+         2
+                                            9
+                             6
+                                            9
+                             6
+         2
+         2
+                                            9
+                                            9
+                                            9
+                                            9
+                                            9
+                                            9
+                                            9
+Checking thread IDs...
+...done.
+----------
+Submitted:
+----------
+Child process (7494) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,451c1
+< Launching LWPS
+<                    4
+<     1
+<                                        8
+<                    4
+<          2
+<               3
+<                              6
+<               3
+<                    4
+<                                             9
+<                    4
+<                                             9
+<                                   7
+<               3
+<                                   7
+<                    4
+<                    4
+<          2
+<               3
+<          2
+<     1
+<                                   7
+<                    4
+<               3
+<          2
+<     1
+<                         5
+<                              6
+<                                   7
+<               3
+<               3
+<               3
+<                              6
+<          2
+<                         5
+<                              6
+<                    4
+<                                        8
+<                              6
+<               3
+<               3
+<               3
+<                         5
+<     1
+<                         5
+<     1
+<               3
+<                         5
+<                                        8
+<     1
+<          2
+<               3
+<          2
+<     1
+<     1
+<                              6
+<          2
+<                              6
+<     1
+<                                   7
+<                                   7
+<               3
+<                                             9
+<          2
+<     1
+<                                        8
+<          2
+<                              6
+<                                        8
+<                                        8
+<                                        8
+<                                        8
+<                                        8
+<     1
+<                                   7
+<                                             9
+<                         5
+<          2
+<                                   7
+<                         5
+<          2
+<                                        8
+<                                   7
+<               3
+<                              6
+<               3
+<                         5
+<                    4
+<                         5
+<          2
+<                                        8
+<                                   7
+<                                   7
+<                                        8
+<                                             9
+<                                   7
+<                                   7
+<     1
+<               3
+<               3
+<                    4
+<                              6
+<                                   7
+<                              6
+<                                             9
+<                         5
+<                                   7
+<                    4
+<                    4
+<          2
+<                    4
+<          2
+<                    4
+<               3
+<                    4
+<     1
+<                              6
+<                                   7
+<               3
+<                                   7
+<                    4
+<                    4
+<                                        8
+<                         5
+<                                   7
+<     1
+<               3
+<               3
+<                                   7
+<     1
+<                                        8
+<                    4
+<                                   7
+<                    4
+<                                             9
+<                    4
+<                              6
+<          2
+<                    4
+<                         5
+<                                        8
+<     1
+<                                             9
+<               3
+<                         5
+<                         5
+<                         5
+<               3
+<                         5
+<                                             9
+<               3
+<                                             9
+<          2
+<                                   7
+<                                        8
+<     1
+<                                   7
+<          2
+<                    4
+<                              6
+<                    4
+<               3
+<                                        8
+<                                             9
+<                         5
+<                              6
+<     1
+<                                             9
+<                    4
+<     1
+<                                        8
+<                    4
+<               3
+<                                             9
+<                                             9
+<                                        8
+<               3
+<               3
+<     1
+<                         5
+<                                   7
+<                              6
+<                                   7
+<               3
+<                         5
+<                                        8
+<                              6
+<                         5
+<               3
+<          2
+<               3
+<                              6
+<                    4
+<                                             9
+<          2
+<                         5
+<          2
+<                                        8
+<                                        8
+<     1
+<          2
+<                                             9
+<                                   7
+<                              6
+<                                        8
+<                    4
+<          2
+<                                             9
+<                    4
+<                                   7
+<                                   7
+<                    4
+<                    4
+<                              6
+<                              6
+<                                        8
+<          2
+<                                        8
+<     1
+<                                             9
+<                         5
+<                              6
+<                                        8
+<                                             9
+<                              6
+<                                        8
+<     1
+<               3
+<     1
+<                    4
+<                              6
+<               3
+<          2
+<                                             9
+<               3
+<               3
+<                                   7
+<                                             9
+<                         5
+<                    4
+<                                   7
+<               3
+<                              6
+<     1
+<                              6
+<     1
+<                         5
+<                    4
+<                         5
+<          2
+<                                             9
+<                    4
+<     1
+<                                        8
+<                    4
+<                                   7
+<                              6
+<                    4
+<                                   7
+<                    4
+<               3
+<                                        8
+<                                             9
+<                              6
+<                                        8
+<                    4
+<     1
+<                                   7
+<               3
+<               3
+<                              6
+<                         5
+<     1
+<                                   7
+<                                        8
+<     1
+<                                             9
+<                              6
+<                         5
+<                         5
+<                              6
+<                    4
+<                              6
+<                    4
+<                                   7
+<                         5
+<                                   7
+<                                             9
+<                    4
+<                                   7
+<                    4
+<                         5
+<                         5
+<                    4
+<          2
+<                    4
+<                              6
+<                                        8
+<                         5
+<               3
+<                         5
+<                         5
+<          2
+<                                        8
+<               3
+<                                             9
+<                              6
+<     1
+<                    4
+<                                             9
+<          2
+<                              6
+<                                   7
+<     1
+<                    4
+<                                             9
+<                                        8
+<          2
+<                                   7
+<     1
+<                                   7
+<                                        8
+<          2
+<                              6
+<                    4
+<               3
+<                                   7
+<                                   7
+<                                             9
+<     1
+<                                        8
+<     1
+<                                             9
+<          2
+<                                        8
+<     1
+<                                             9
+<               3
+<                                   7
+<                                   7
+<                         5
+<                                             9
+<                         5
+<                    4
+<          2
+<                                        8
+<     1
+<                                        8
+<                                        8
+<                                   7
+<                              6
+<     1
+<     1
+<               3
+<     1
+<                                        8
+<     1
+<               3
+<                                        8
+<     1
+<               3
+<                              6
+<                                        8
+<                                   7
+<     1
+<     1
+<          2
+<                         5
+<                              6
+<          2
+<               3
+<          2
+<     1
+<                                   7
+<                              6
+<               3
+<                    4
+<                         5
+<                                             9
+<                                        8
+<                              6
+<     1
+<                         5
+<     1
+<                         5
+<                                   7
+<                                        8
+<               3
+<                         5
+<          2
+<                                        8
+<          2
+<                                             9
+<          2
+<                    4
+<          2
+<                         5
+<                                        8
+<                         5
+<                                             9
+<                                   7
+<                                             9
+<                         5
+<                         5
+<                              6
+<                              6
+<                         5
+<     1
+<                                   7
+<                                   7
+<                                             9
+<          2
+<     1
+<                                        8
+<                              6
+<          2
+<                                        8
+<                         5
+<     1
+<                                             9
+<                                        8
+<                              6
+<                         5
+<                         5
+<                         5
+<          2
+<          2
+<          2
+<                              6
+<                              6
+<          2
+<                              6
+<          2
+<                                             9
+<          2
+<                                             9
+<                              6
+<                                             9
+<                              6
+<          2
+<          2
+<                                             9
+<                                             9
+<                                             9
+<                                             9
+<                                             9
+<                                             9
+<                                             9
+< Checking thread IDs...
+< ...done.
+---
+> Child process (7494) exited due to signal (Segmentation fault).
+---------
+=================================================
+TEST 28: Is thread library using sched_{one,two}?
+
+This launches a set of threads, then installs a scheduler that 
+intentionally places bogus values in sched_one and sched_two then 
+calls tid2thread() a bunch.
+
+
+
+----------
+Reference:
+----------
+Launching LWPS
+  1
+     2
+        3
+           4
+              5
+                 6
+                    7
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+        3
+           4
+              5
+                 6
+                    7
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+     2
+        3
+           4
+              5
+                 6
+                    7
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+           4
+              5
+                 6
+                    7
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+              5
+                 6
+                    7
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                 6
+                    7
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                    7
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                       8
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                          9
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                            10
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                               11
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                                  12
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                                     13
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                                        14
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                                           15
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                                              16
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                                                 17
+                                                    18
+                                                       19
+                                                          20
+                                                    18
+                                                       19
+                                                          20
+                                                       19
+                                                          20
+                                                          20
+Back from LWPS.
+----------
+Submitted:
+----------
+Child process (7559) exited due to signal (Segmentation fault).
+
+---------------------------------
+Differences (< reference > output)
+---------------------------------
+
+1,212c1
+< Launching LWPS
+<   1
+<      2
+<         3
+<            4
+<               5
+<                  6
+<                     7
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<         3
+<            4
+<               5
+<                  6
+<                     7
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<      2
+<         3
+<            4
+<               5
+<                  6
+<                     7
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<            4
+<               5
+<                  6
+<                     7
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<               5
+<                  6
+<                     7
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                  6
+<                     7
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                     7
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                        8
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                           9
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                             10
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                11
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                   12
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                      13
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                         14
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                            15
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                               16
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                                  17
+<                                                     18
+<                                                        19
+<                                                           20
+<                                                     18
+<                                                        19
+<                                                           20
+<                                                        19
+<                                                           20
+<                                                           20
+< Back from LWPS.
+---
+> Child process (7559) exited due to signal (Segmentation fault).
+---------

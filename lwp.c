@@ -201,6 +201,8 @@ tid_t lwp_create(lwpfun fun, void *arg)
     uintptr_t getBaseLoc;
     thread newThread;
     void *stackBase;
+    uintptr_t calcAddress;
+    unsigned long *registerAddress;
 
     /*create the threads context and stack*/
     /*calculate howBig the stack size will be*/
@@ -245,7 +247,15 @@ tid_t lwp_create(lwpfun fun, void *arg)
     /*initialize the stack*/
 
     getBaseLoc = (uintptr_t)newThread->stack;
-    getBaseLoc += howBig - (ADDRESS_SIZE * 2);
+    //getBaseLoc += howBig - (ADDRESS_SIZE * 2);
+    getBaseLoc += howBig;
+
+    /*check if the address is divisible by 16*/
+    if(getBaseLoc % 16 != 0){
+        getBaseLoc -= (getBaseLoc % 16);
+    }
+
+    getBaseLoc -= (ADDRESS_SIZE * 2);
 
     /*"Push" the address of lwp_wrap to the top of the
     stack so that when ret happens, it pops this address
@@ -253,8 +263,23 @@ tid_t lwp_create(lwpfun fun, void *arg)
     Also "Push" the sbp of the stack allocated by mmap
     so it returns to the appropriate stack frame ASK NICO*/
 
-    newThread->stack[howBig - PREV] = (unsigned long)lwp_wrap;
-    newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
+    //newThread->stack[howBig - PREV] = (unsigned long)lwp_wrap;
+    //newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
+
+    calcAddress = getBaseLoc;
+    calcAddress -= ADDRESS_SIZE;
+    registerAddress = (unsigned long *)calcAddress;
+
+    /*add lwp_wrap's function address to the bottom of 
+    the stack*/
+    registerAddress[0] = (unsigned long)lwp_wrap;
+
+    /*place an address for the base pointer to be assigned 
+    on the stack*/
+    calcAddress -= ADDRESS_SIZE;
+    registerAddress = (unsigned long *)calcAddress;
+    registerAddress[0] = getBaseLoc;
+    
 
     /*Set rbp to the address of the rbp reg on our stack
     so that when it is popped inside leave and ret, it pops

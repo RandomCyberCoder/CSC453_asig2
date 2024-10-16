@@ -20,6 +20,7 @@
 #define NO_OFF 0
 #define INIT 1
 #define PREV 1
+#define EMPTY 0
 
 /*
 lib_one is a next pointer for the next thread in a list
@@ -200,7 +201,6 @@ tid_t lwp_create(lwpfun fun, void *arg)
     uintptr_t getBaseLoc;
     thread newThread;
     void *stackBase;
-    unsigned long *baseLoc;
 
     /*create the threads context and stack*/
     /*calculate howBig the stack size will be*/
@@ -254,7 +254,7 @@ tid_t lwp_create(lwpfun fun, void *arg)
     so it returns to the appropriate stack frame ASK NICO*/
 
     newThread->stack[howBig - PREV] = lwp_wrap;
-    newThread->stack[howBig - (PREV * 2)] = getBaseLoc;
+    newThread->stack[howBig - (PREV * 2)] = (unsigned long)getBaseLoc;
 
     /*Set rbp to the address of the rbp reg on our stack
     so that when it is popped inside leave and ret, it pops
@@ -295,7 +295,7 @@ void lwp_start(void)
 
     systemThread->tid = threadIdCounter++;
     systemThread->stack = NULL;
-    systemThread->stacksize = NULL;
+    systemThread->stacksize = EMPTY;
     systemThread->status = LWP_LIVE; /*ASK NICO*/
 
     /*Add thread to pool*/
@@ -652,6 +652,7 @@ tid_t lwp_gettid(void)
 void lwp_set_scheduler(scheduler fun)
 {
     scheduler oldScheduler;
+    thread nxtThread;
 
     if(fun == NULL && currentScheduler == &rr_publish)
     {
@@ -673,7 +674,7 @@ void lwp_set_scheduler(scheduler fun)
     }   
 
 
-    for(thread nxtThread = oldScheduler->next();
+    for(nxtThread = oldScheduler->next();
         nxtThread != NULL; nxtThread = oldScheduler->next())
     {
         

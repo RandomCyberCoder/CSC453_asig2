@@ -1,2 +1,6 @@
 - Emmanuel Delgado (edelga13) ; Logan Barker (ljbarker)
 - No Special Instructions
+- Other things to know: 
+    - lib_one is a next pointer for the next thread in a list
+    - lib_two is a prev pointer for the previous thread in a list
+    - sched_one and sched_two behave the same way for the scheduler

@@ -27,7 +27,7 @@
 
 /*
 lib_one is a next pointer for the next thread in a list
-lib_two is a NEXT pointer for the NEXT thread in a list
+lib_two is a prev pointer for the previous thread in a list
 */
 
 void terminateThread(thread victim, int *status, int shouldSD);
@@ -55,7 +55,6 @@ unsigned long threadIdCounter = INIT;
 
 size_t create_stackSizeHelper()
 {
-    /*Do we need to worry about 16 byte alignment? ASK NICO*/
     size_t pageSize, howBig, MB_8, multBy;
     struct rlimit rlimStruct;
     int retVal;
@@ -117,6 +116,8 @@ size_t create_stackSizeHelper()
         }
     }
 
+    /*Ensure the size is also 16 byte aligned*/
+
     while (howBig % ALIGN_FACTOR)
     {
         howBig += pageSize;
@@ -133,16 +134,20 @@ void add_thread_to_pool(thread newThread)
     if (threadPool == NULL)
     {
         threadPool = newThread;
-        newThread->lib_one = NULL; // ED added this line
+        newThread->lib_one = NULL;
         newThread->lib_two = NULL;
     }
     else
     {
+        /*Search for the end of the pool*/
+
         currThread = threadPool;
         while (currThread->lib_one != NULL)
         {
             currThread = currThread->lib_one;
         }
+
+        /*Adjust pointers at the end of the pool*/
         currThread->lib_one = newThread;
         newThread->lib_two = currThread;
     }
@@ -263,23 +268,29 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     /*initialize the stack*/
 
-    /*"Push" the address of lwp_wrap to the top of the
-    stack so that when ret happens, it pops this address
-    and returns to it to execute
-    Also "Push" the sbp of the stack allocated by mmap
-    so it returns to the appropriate stack frame ASK NICO*/
+    /*Pointer to the base of the stack*/
 
     getBaseLoc = (uintptr_t)newThread->stack;
+
+    /*Increment to the top of the stack and subtract
+    3 memory addresses worth so we can start writing
+    our register values to the stack*/
     getBaseLoc += howBig - (ADDRESS_SIZE * 3);
-    /* top of stack -> bottom of stack: somewhere rbp ... lwp_wrap
-            ... ret lwp_wrap "caller"  */
     registerAddress = (unsigned long *)getBaseLoc;
+
+    /*"Push" the sbp of the stack allocated by mmap
+    so it returns to the appropriate stack frame*/
 
     registerAddress[0] = (unsigned long)(getBaseLoc +
                                          ADDRESS_SIZE * 2);
+
+    /*Then "Push" the address of lwp_wrap to the top of the
+    stack so that when ret happens, it pops this address
+    and returns to it to execute*/
     registerAddress[NEXT] = (unsigned long)lwp_wrap;
 
-    // will never be used but needed on stack
+    /*Then "Push" a dummy sbp for alignment purposes*/
+
     registerAddress[2 * NEXT] = (unsigned long)(getBaseLoc +
                                                 ADDRESS_SIZE * 4);
 
@@ -297,6 +308,8 @@ tid_t lwp_create(lwpfun fun, void *arg)
 
     currentScheduler->admit(newThread);
 
+    /*Return its tid*/
+
     return newThread->tid;
 }
 
@@ -308,6 +321,7 @@ void lwp_start(void)
     into a LWP. Set up its context and admit() it
     to the scheduler. Don't allocate stack!
     IMPORTANT: DON'T DEALLOCATE THIS LWP!!!! */
+
     systemThread = (thread)malloc(sizeof(context));
     if (systemThread == NULL)
     {
@@ -324,7 +338,7 @@ void lwp_start(void)
     systemThread->tid = threadIdCounter++;
     systemThread->stack = NULL;
     systemThread->stacksize = EMPTY;
-    systemThread->status = LWP_LIVE; /*ASK NICO*/
+    systemThread->status = LWP_LIVE;
 
     /*Add thread to pool*/
 
@@ -535,14 +549,17 @@ thread tid2thread(tid_t tid)
 
     while (checkThread != NULL)
     {
+        /*If we've found the desired thread
+        return the thread pointer*/
+
         if (tid == checkThread->tid)
         {
             return checkThread;
         }
-        else
-        {
-            checkThread = checkThread->lib_one;
-        }
+
+        /*Else check the next thread*/
+
+        checkThread = checkThread->lib_one;
     }
 
     /*If the thread wasn't found return NULL*/
@@ -552,6 +569,9 @@ thread tid2thread(tid_t tid)
 
 tid_t lwp_gettid(void)
 {
+    /*Return calling thread id if called from
+    inside an lwp and NO_THREAD otherwise*/
+
     if (callingThread != NULL)
     {
         return callingThread->tid;
@@ -564,15 +584,25 @@ void lwp_set_scheduler(scheduler fun)
     scheduler oldScheduler;
     thread nxtThread;
 
+    /*If the desired scheduler is the same as the
+    current scheduler don't do anything and avoid loop*/
+
     if (fun == currentScheduler)
     {
         return;
     }
 
+    /*If NULL is passed and we are already on the rr scheduler
+    do nothing and return*/
+
     if (fun == NULL && currentScheduler == &rr_publish)
     {
         return;
     }
+
+    /*If NULL is passed and we are not on the rr scheduler
+    set the current scheduler to rr and keep track of the old
+    one for thread transfer*/
 
     if (fun == NULL && currentScheduler != &rr_publish)
     {
@@ -581,14 +611,21 @@ void lwp_set_scheduler(scheduler fun)
     }
     else
     {
+        /*Else use the new scheduler*/
+
         oldScheduler = currentScheduler;
         currentScheduler = fun;
     }
+
+    /*Call scheduler initialization if any*/
 
     if (currentScheduler->init != NULL)
     {
         currentScheduler->init();
     }
+
+    /*For every thread in the current schedule,
+    transfer it to the new schedule*/
 
     for (nxtThread = oldScheduler->next();
          nxtThread != NULL; nxtThread = oldScheduler->next())
@@ -597,6 +634,8 @@ void lwp_set_scheduler(scheduler fun)
         oldScheduler->remove(nxtThread);
         currentScheduler->admit(nxtThread);
     }
+
+    /*Shut down the old scheduler if necessary*/
 
     if (oldScheduler->shutdown != NULL)
     {

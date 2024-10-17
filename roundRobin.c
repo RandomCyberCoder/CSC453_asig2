@@ -22,8 +22,6 @@ unsigned long qLen = 0;
 
 void rrAdmit(thread new)
 {
-    thread curr;
-
     if (head == NULL)
     {
         /*

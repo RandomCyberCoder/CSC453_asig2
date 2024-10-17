@@ -152,17 +152,16 @@ int remove_thread_from_pool(thread victim)
 
     currThread = threadPool;
 
-    /*If the only thread in the pool is the victim, set pool to NULL*/
+    /*If we're the first thread, just update the threadpool head*/
 
-    if (threadPool == victim && threadPool->lib_one == NULL)
+    if (currThread == victim)
     {
-        threadPool = NULL;
+        threadPool = threadPool->lib_one;
         return EXIT_SUCCESS;
     }
 
     /*Search for the victim*/
 
-    currThread = threadPool;
     while (currThread->lib_one != victim)
     {
         currThread = currThread->lib_one;
@@ -207,14 +206,13 @@ tid_t lwp_create(lwpfun fun, void *arg)
     uintptr_t getBaseLoc;
     thread newThread;
     void *stackBase;
-    uintptr_t calcAddress;
     unsigned long *registerAddress;
 
     /*create the threads context and stack*/
     /*calculate howBig the stack size will be*/
 
     howBig = create_stackSizeHelper();
-    newThread = (thread)malloc(sizeof(thread));
+    newThread = (thread)malloc(sizeof(context));
 
     /*Check if malloc failed*/
 
@@ -341,6 +339,7 @@ void lwp_start(void)
     {
         errno = ENOMEM;
         perror("lwp_start() malloc() for thread context failed");
+        exit(EXIT_FAILURE);
     }
 
     /*Initialize context. Stack attributes are NULL
@@ -407,6 +406,7 @@ void lwp_yield(void)
         if (retStatus == SYS_FAIL)
         {
             perror("Failed to remove thread from pool");
+            exit(EXIT_FAILURE);
         }
 
         /*Deallocate the threads resources*/
@@ -433,6 +433,7 @@ void lwp_yield(void)
         if (retStatus == SYS_FAIL)
         {
             perror("Failed to unmap region");
+            exit(EXIT_FAILURE);
         }
 
         free(callingThread);
@@ -521,28 +522,28 @@ void lwp_exit(int exitval)
 
 tid_t lwp_wait(int *status)
 {
-    thread currThread;
+    thread terminatedThread, waitingThread;
     tid_t tid;
     int retStatus;
 
     /*Search for terminated threads in the terminated list*/
 
-    currThread = terminated;
+    terminatedThread = terminated;
 
-    /*If there are no terminated threads, add this
-    thread to the waiting thread list*/
+    /*If there are no terminated threads, add the
+    calling thread to the waiting thread list*/
 
-    if (currThread == NULL)
+    if (terminatedThread == NULL)
     {
         /*Deschedule the calling thread first*/
 
         currentScheduler->remove(callingThread);
 
-        /*Add to waiting thread list*/
+        /*Add it to waiting thread list*/
 
-        currThread = waiting;
+        waitingThread = waiting;
 
-        if (currThread == NULL)
+        if (waitingThread == NULL)
         {
             /*If waiting list is empty, set head to caller*/
 
@@ -552,40 +553,45 @@ tid_t lwp_wait(int *status)
         {
             /*Search for end of waiting thread list*/
 
-            while (currThread->exited != NULL)
+            while (waitingThread->exited != NULL)
             {
-                currThread = currThread->exited;
+                waitingThread = waitingThread->exited;
             }
 
             /*And add the calling thread to the end*/
 
-            currThread->exited = callingThread;
+            waitingThread->exited = callingThread;
         }
 
-        /*Set next pointer of end of list to NULL*/
+        /*Set terminated/waiting pointer of caller to NULL*/
 
         callingThread->exited = NULL;
 
         /*If there are no more runnable threads return NO_THREAD*/
 
-        if (currentScheduler->qlen() <= 1)
+        if (currentScheduler->qlen() < 1)
         {
-            /*Remove the thread from the pool*/
+            /*Terminate the calling thread*/
 
-            retStatus = remove_thread_from_pool(currThread);
+            callingThread->status = LWP_TERM;
+
+            /*Remove the calling thread from the pool*/
+
+            retStatus = remove_thread_from_pool(callingThread);
 
             /*Check if successful*/
 
             if (retStatus == SYS_FAIL)
             {
                 perror("Failed to remove thread from pool");
+                exit(EXIT_FAILURE);
             }
 
             /*Populate status if non-null*/
 
             if (status != NULL)
             {
-                *status = currThread->status;
+                *status = callingThread->status;
             }
 
             /*Deallocate the threads resources*/
@@ -594,24 +600,27 @@ tid_t lwp_wait(int *status)
             do nothing about a stack and return it's id
             after freeing the thread context*/
 
-            if (currThread->stack == NULL)
+            if (callingThread->stack == NULL)
             {
-                free(currThread);
+                free(callingThread);
                 return NO_THREAD;
             }
 
             /*Otherwise, unmap its memory region, free the
-            thread context, and return the id*/
+            thread context, and return its id*/
 
-            retStatus = munmap(currThread->stack, currThread->stacksize);
+            retStatus = munmap(callingThread->stack, callingThread->stacksize);
 
             /*Check if munmap failed*/
             if (retStatus == SYS_FAIL)
             {
                 perror("Failed to unmap region");
+                exit(EXIT_FAILURE);
             }
 
-            free(currThread);
+            tid = callingThread->tid;
+            free(callingThread);
+
             /*Shutdown the scheduler if needed*/
 
             if (currentScheduler->shutdown != NULL)
@@ -619,7 +628,7 @@ tid_t lwp_wait(int *status)
                 currentScheduler->shutdown();
             }
 
-            return NO_THREAD;
+            return tid;
         }
 
         /*Otherwise "block" by yielding*/
@@ -628,22 +637,23 @@ tid_t lwp_wait(int *status)
 
         /*Get the oldest terminated thread now that we're back*/
 
-        currThread = terminated;
+        terminatedThread = terminated;
     }
 
     /*Get the id of the thread*/
 
-    tid = currThread->tid;
+    tid = terminatedThread->tid;
 
     /*Remove the thread from the pool*/
 
-    retStatus = remove_thread_from_pool(currThread);
+    retStatus = remove_thread_from_pool(terminatedThread);
 
     /*Check if successful*/
 
     if (retStatus == SYS_FAIL)
     {
         perror("Failed to remove thread from pool");
+        exit(EXIT_FAILURE);
     }
 
     /*Update the terminated list*/
@@ -654,7 +664,7 @@ tid_t lwp_wait(int *status)
 
     if (status != NULL)
     {
-        *status = currThread->status;
+        *status = terminatedThread->status;
     }
 
     /*Deallocate the threads resources*/
@@ -663,24 +673,25 @@ tid_t lwp_wait(int *status)
     do nothing about a stack and return it's id
     after freeing the thread context*/
 
-    if (currThread->stack == NULL)
+    if (terminatedThread->stack == NULL)
     {
-        free(currThread);
+        free(terminatedThread);
         return tid;
     }
 
     /*Otherwise, unmap its memory region, free the
     thread context, and return the id*/
 
-    retStatus = munmap(currThread->stack, currThread->stacksize);
+    retStatus = munmap(terminatedThread->stack, terminatedThread->stacksize);
 
     /*Check if munmap failed*/
     if (retStatus == SYS_FAIL)
     {
         perror("Failed to unmap region");
+        exit(EXIT_FAILURE);
     }
 
-    free(currThread);
+    free(terminatedThread);
     return tid;
 }
 

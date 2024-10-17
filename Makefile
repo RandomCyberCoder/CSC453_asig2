@@ -39,8 +39,8 @@ magic64.o: magic64.S
 rmcore:
 	rm -f core*
 
-test: prog.c lwp.c magic64.S roundRobin.c
-	$(LD) -g -Wall -o $@ prog.c -L./ -llwp
+test: numbersmain.c lwp.c magic64.S roundRobin.c
+	$(LD) -g -Wall -o $@ numbersmain.c -L./ -llwp
 
 all: 	$(PROGS)
 

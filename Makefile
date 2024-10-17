@@ -28,7 +28,7 @@ liblwp.so: lwp.c lwp.h magic64.o roundRobin.o lwp.o
 	$(CC) -shared -fPIC -o liblwp.so lwp.o roundRobin.o magic64.o
 
 lwp.o: lwp.c lwp.h
-	$(CC) -Wall -g -fPIC -c -o lwp.o -c lwp.c
+	$(CC) -Wall -g -fPIC -c -o lwp.o lwp.c
 
 roundRobin.o: roundRobin.h roundRobin.c
 	$(CC) -Wall -g -fPIC -c -o roundRobin.o roundRobin.c

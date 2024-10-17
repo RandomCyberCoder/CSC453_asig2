@@ -173,6 +173,10 @@ int remove_thread_from_pool(thread victim)
         }
     }
 
+    /*Set currThread to the victim*/
+
+    currThread = currThread->lib_one;
+
     /*If we're the last thread, just update the NEXT thread's next pointer*/
 
     if (currThread->lib_one == NULL)
@@ -334,7 +338,7 @@ void lwp_start(void)
     into a LWP. Set up its context and admit() it
     to the scheduler. Don't allocate stack!
     IMPORTANT: DON'T DEALLOCATE THIS LWP!!!! */
-    systemThread = (thread)malloc(sizeof(thread));
+    systemThread = (thread)malloc(sizeof(context));
     if (systemThread == NULL)
     {
         errno = ENOMEM;

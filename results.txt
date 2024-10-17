@@ -25,7 +25,7 @@ Building the application: "make liblwp.so"
 make liblwp.so
 gcc -o magic64.o -c magic64.S
 gcc -Wall -g -fPIC -c -o roundRobin.o roundRobin.c
-gcc -Wall -g -fPIC -c -o lwp.o -c lwp.c
+gcc -Wall -g -fPIC -c -o lwp.o lwp.c
 gcc -shared -fPIC -o liblwp.so lwp.o roundRobin.o magic64.o
 
 ---------------

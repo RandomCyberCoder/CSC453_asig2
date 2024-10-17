@@ -1,0 +1,77 @@
+
+------------------------
+Looking for source files
+------------------------
+
+Found: fp.h hungrysnakes.c lwp.c lwp.h prog.c randomsnakes.c roundRobin.c roundRobin.h schedulers.h snakes.h util.c util.h
+
+-----------------------
+Looking for a Makefile
+----------------------
+
+Found: Makefile
+
+--------------------------------
+Checking for long lines (no program should have any lines > 80 chars)
+--------------------------------
+
+Line length ok.
+
+
+------------------------------------
+Building the application: "make liblwp.so"
+------------------------------------
+
+make liblwp.so
+gcc -o magic64.o -c magic64.S
+gcc -Wall -g -fPIC -c -o roundRobin.o roundRobin.c
+gcc -Wall -g -fPIC -c -o lwp.o -c lwp.c
+gcc -shared -fPIC -o liblwp.so lwp.o roundRobin.o magic64.o
+
+---------------
+checking for liblwp.so
+---------------
+
+
+--------------------------------------------------------
+Test Results:
+   These are the results of trying your liblwp.so
+against several programs with different characteristics 
+described by the filename.  The output of your program
+is compared to a reference output using diff(1).  If they
+differ, the test case is a failure.
+
+
+Testing (failure details below):
+        -----
+         1) Linking (only) against required routines      ... ok.
+         2) Create a thread, but don't run it.            ... ok.
+         3) start(). System thread only. Calls exit(3);   ... ok.
+         4) start(). System thread only. Calls lwp_exit() ... ok.
+         5) Check stack frame alignment                   ... ok.
+         6) One lwp, calling lwp_yield(), then exit()     ... ok.
+         7) One created lwp which calls exit(3), main() l ... ok.
+         8) Five lwps, calling lwp_yield(), then exit()   ... ok.
+         9) Five lwps, calling lwp_yield(), then lwp_exit ... ok.
+        10) Five threads, variable iters, exit from front ... ok.
+        11) Five threads, variable iters, exit from front ... ok.
+        12) Five threads, variable iters, exit from back  ... ok.
+        13) Five threads, AlwaysZero scheduling           ... ok.
+        14) One lwp, yields, and returns                  ... ok.
+        15) Ten lwps, yields, and returns                 ... ok.
+        16) Lwp spawns another then exits 100 times.      ... ok.
+        17) Two Lwps. spawn then exits 50 times.          ... ok.
+        18) 1024 threads, random exit.                    ... ok.
+        19) Ping pong with semaphores                     ... ok.
+        20) Dine with semaphores                          ... ok.
+        21) Transfer threads between schedulers (stopped) ... ok.
+        22) Transfer threads between schedulers (live)    ... ok.
+        23) Transfer threads to same scheduler (live)     ... ok.
+        24) Transfer threads between schedulers check for ... ok.
+        25) Check that Returned TIDs are unique           ... ok.
+        26) Does tid2thread return the right thread?      ... ok.
+        27) Tid2thread() returns NULL given a bad tid?    ... ok.
+        28) Is thread library using sched_one? sched_two? ... ok.
+        -----
+Success. (28/28 passed)
+

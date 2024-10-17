@@ -17,8 +17,10 @@
 #define ADDRESS_SIZE 8
 #define SYS_FAIL -1
 #define NO_FD -1
+#define NO_SHUTDOWN 0
 #define EVEN_PAGE 0
 #define NO_OFF 0
+#define SHUTDOWN 1
 #define INIT 1
 #define NEXT 1
 #define EMPTY 0
@@ -28,9 +30,16 @@ lib_one is a next pointer for the next thread in a list
 lib_two is a NEXT pointer for the NEXT thread in a list
 */
 
+void terminateThread(thread victim, int *status, int shouldSD);
+
 /*Create RoundRobin scheduler and set it to currentScheduler by default*/
 
-struct scheduler rr_publish = {NULL, NULL, rrAdmit, rrRemove, rrNext, rrqlen};
+struct scheduler rr_publish = {NULL,
+                               NULL,
+                               rrAdmit,
+                               rrRemove,
+                               rrNext,
+                               rrqlen};
 scheduler currentScheduler = &rr_publish;
 
 /*for global linked list of threads*/
@@ -283,37 +292,37 @@ tid_t lwp_create(lwpfun fun, void *arg)
             (unsigned long *)lwp_wrap);*/
     // old *(registerAddress + NEXT) = (unsigned long)lwp_wrap;
 
-    /*fprintf(stderr, "RA loc %p\n", registerAddress + NEXT); 
+    /*fprintf(stderr, "RA loc %p\n", registerAddress + NEXT);
     fprintf(stderr, "Add at ra loc %p\n",
             *(registerAddress + NEXT));
     fprintf(stderr, "rbp loc %p\n", registerAddress);
     fprintf(stderr, "Add at rbp loc %p\n",
             *registerAddress);*/
-    
+
     getBaseLoc = (uintptr_t)newThread->stack;
     getBaseLoc += howBig - (ADDRESS_SIZE * 3);
-    //fprintf(stderr, "rbp loc %d\n", getBaseLoc);
-    //fprintf(stderr, "rbp loc %d\n", getBaseLoc);
-    //assuming it register takes 8 bytes off the stack
+    // fprintf(stderr, "rbp loc %d\n", getBaseLoc);
+    // fprintf(stderr, "rbp loc %d\n", getBaseLoc);
+    // assuming it register takes 8 bytes off the stack
     /* top of stack -> bottom of stack: somewhere rbp ... lwp_wrap
             ... rbp lwp_wrap "caller"... ret lwp_wrap "caller"  */
     registerAddress = (unsigned long *)getBaseLoc;
-    //fprintf(stderr, "reg_address loc %p\n", registerAddress);
-    registerAddress[0] = (unsigned long) (getBaseLoc +
-                        ADDRESS_SIZE * 2);
+    // fprintf(stderr, "reg_address loc %p\n", registerAddress);
+    registerAddress[0] = (unsigned long)(getBaseLoc +
+                                         ADDRESS_SIZE * 2);
     registerAddress[NEXT] = (unsigned long)lwp_wrap;
 
-    //will never be used but needed on stack
-    registerAddress[2*NEXT] = (unsigned long) (getBaseLoc +
-                        ADDRESS_SIZE * 4);
+    // will never be used but needed on stack
+    registerAddress[2 * NEXT] = (unsigned long)(getBaseLoc +
+                                                ADDRESS_SIZE * 4);
 
-    //registerAddress += NEXT;
-    // *(registerAddress) = (unsigned long)lwp_wrap;
+    // registerAddress += NEXT;
+    //  *(registerAddress) = (unsigned long)lwp_wrap;
 
     /*Set rbp to the address of the rbp reg on our stack
     so that when it is popped inside leave and ret, it pops
     our rbp filler value and then the address of lwp_wrap for ret*/
-    
+
     newThread->state.rbp = (unsigned long)(getBaseLoc);
 
     /*fprintf(stderr, "rbp to become rsp %p\n",
@@ -376,7 +385,7 @@ void lwp_start(void)
 void lwp_yield(void)
 {
     thread oldThread, nextThread;
-    unsigned int status, retStatus;
+    unsigned int status;
     /*Yield control to the next LWP in the schedule*/
 
     /*Get the next thread from the scheduler*/
@@ -394,56 +403,9 @@ void lwp_yield(void)
 
         status = callingThread->status;
 
-        /*Shutdown the scheduler if necessary*/
+        /*Terminate the calling thread and Exit*/
 
-        if (currentScheduler->shutdown != NULL)
-        {
-            currentScheduler->shutdown();
-        }
-
-        /*Remove calling thread from pool*/
-
-        retStatus = remove_thread_from_pool(callingThread);
-
-        /*Check if successful*/
-
-        if (retStatus == SYS_FAIL)
-        {
-            perror("Failed to remove thread from pool");
-            exit(EXIT_FAILURE);
-        }
-
-        /*Deallocate the threads resources*/
-
-        /*If the thread is the system thread,
-        do nothing about a stack and
-        free the thread context*/
-
-        if (callingThread->stack == NULL)
-        {
-            free(callingThread);
-
-            /*Exit with syscall a*/
-
-            exit(status);
-        }
-
-        /*Otherwise, unmap its memory region, free the
-        thread context, and exit*/
-
-        retStatus = munmap(callingThread->stack, callingThread->stacksize);
-
-        /*Check if munmap failed*/
-        if (retStatus == SYS_FAIL)
-        {
-            perror("Failed to unmap region");
-            exit(EXIT_FAILURE);
-        }
-
-        free(callingThread);
-
-        /*Exit with syscall a*/
-
+        terminateThread(callingThread, NULL, SHUTDOWN);
         exit(status);
     }
 
@@ -528,7 +490,6 @@ tid_t lwp_wait(int *status)
 {
     thread terminatedThread, waitingThread;
     tid_t tid;
-    int retStatus;
 
     /*Search for terminated threads in the terminated list*/
 
@@ -575,62 +536,17 @@ tid_t lwp_wait(int *status)
 
         if (currentScheduler->qlen() < 1)
         {
-            /*Terminate the calling thread*/
+            /*Set status to terminated*/
 
             callingThread->status = LWP_TERM;
 
-            /*Remove the calling thread from the pool*/
-
-            retStatus = remove_thread_from_pool(callingThread);
-
-            /*Check if successful*/
-
-            if (retStatus == SYS_FAIL)
-            {
-                perror("Failed to remove thread from pool");
-                exit(EXIT_FAILURE);
-            }
-
-            /*Populate status if non-null*/
-
-            if (status != NULL)
-            {
-                *status = callingThread->status;
-            }
-
-            /*Deallocate the threads resources*/
-
-            /*If the thread is the system thread,
-            do nothing about a stack and return it's id
-            after freeing the thread context*/
-
-            if (callingThread->stack == NULL)
-            {
-                free(callingThread);
-                return NO_THREAD;
-            }
-
-            /*Otherwise, unmap its memory region, free the
-            thread context, and return its id*/
-
-            retStatus = munmap(callingThread->stack, callingThread->stacksize);
-
-            /*Check if munmap failed*/
-            if (retStatus == SYS_FAIL)
-            {
-                perror("Failed to unmap region");
-                exit(EXIT_FAILURE);
-            }
+            /*Get the tid*/
 
             tid = callingThread->tid;
-            free(callingThread);
 
-            /*Shutdown the scheduler if needed*/
+            /*Terminate the thread*/
 
-            if (currentScheduler->shutdown != NULL)
-            {
-                currentScheduler->shutdown();
-            }
+            terminateThread(callingThread, status, SHUTDOWN);
 
             return tid;
         }
@@ -648,54 +564,14 @@ tid_t lwp_wait(int *status)
 
     tid = terminatedThread->tid;
 
-    /*Remove the thread from the pool*/
-
-    retStatus = remove_thread_from_pool(terminatedThread);
-
-    /*Check if successful*/
-
-    if (retStatus == SYS_FAIL)
-    {
-        perror("Failed to remove thread from pool");
-        exit(EXIT_FAILURE);
-    }
-
     /*Update the terminated list*/
 
     terminated = terminated->exited;
 
-    /*Populate status if non-null*/
+    /*Terminate the thread and deallocate resources*/
 
-    if (status != NULL)
-    {
-        *status = terminatedThread->status;
-    }
+    terminateThread(terminatedThread, status, NO_SHUTDOWN);
 
-    /*Deallocate the threads resources*/
-
-    /*If the thread is the system thread,
-    do nothing about a stack and return it's id
-    after freeing the thread context*/
-
-    if (terminatedThread->stack == NULL)
-    {
-        free(terminatedThread);
-        return tid;
-    }
-
-    /*Otherwise, unmap its memory region, free the
-    thread context, and return the id*/
-
-    retStatus = munmap(terminatedThread->stack, terminatedThread->stacksize);
-
-    /*Check if munmap failed*/
-    if (retStatus == SYS_FAIL)
-    {
-        perror("Failed to unmap region");
-        exit(EXIT_FAILURE);
-    }
-
-    free(terminatedThread);
     return tid;
 }
 
@@ -734,7 +610,8 @@ void lwp_set_scheduler(scheduler fun)
     scheduler oldScheduler;
     thread nxtThread;
 
-    if(fun == currentScheduler){
+    if (fun == currentScheduler)
+    {
         return;
     }
 
@@ -742,7 +619,7 @@ void lwp_set_scheduler(scheduler fun)
     {
         return;
     }
-    
+
     if (fun == NULL && currentScheduler != &rr_publish)
     {
         oldScheduler = currentScheduler;
@@ -776,4 +653,61 @@ void lwp_set_scheduler(scheduler fun)
 scheduler lwp_get_scheduler()
 {
     return currentScheduler;
+}
+
+void terminateThread(thread victim, int *status, int shouldSD)
+{
+    int retStatus;
+
+    /*Shutdown the scheduler if needed and possible*/
+
+    if (shouldSD)
+    {
+        if (currentScheduler->shutdown != NULL)
+        {
+            currentScheduler->shutdown();
+        }
+    }
+
+    /*Remove the thread from the pool*/
+
+    retStatus = remove_thread_from_pool(victim);
+
+    /*Check if successful*/
+
+    if (retStatus == SYS_FAIL)
+    {
+        perror("Failed to remove thread from pool");
+        exit(EXIT_FAILURE);
+    }
+
+    /*Populate status if non-null*/
+
+    if (status != NULL)
+    {
+        *status = victim->status;
+    }
+
+    /*Deallocate the threads resources*/
+
+    /*If the thread is not the system thread,
+    unmap its memory region, free the
+    thread context,*/
+
+    if (victim->stack != NULL)
+    {
+        retStatus = munmap(victim->stack, victim->stacksize);
+
+        /*Check if munmap failed*/
+        if (retStatus == SYS_FAIL)
+        {
+            perror("Failed to unmap region");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /*Otherwise, do nothing about the stack
+    and free the thread context*/
+
+    free(victim);
 }

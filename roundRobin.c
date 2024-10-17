@@ -63,8 +63,6 @@ void rrRemove(thread victim)
     thread prvThread;
     thread nxtThread;
 
-    /*fprintf(stderr, "Removing %p\n",
-            (unsigned long *)victim);*/
 
     if (head == NULL)
     {
@@ -135,21 +133,15 @@ thread rrNext()
     else if (qLen == 1)
     {
         curr = head;
-        /*fprintf(stderr, "In Next: Head %p\n",
-                (unsigned long *)curr);*/
         /*if there is only one thread available*/
         return head;
     }
     else
     {
         curr = head;
-        /*fprintf(stderr, "In Next: Head %p\n",
-                (unsigned long *)curr);*/
         curr = curr->sched_one;
         while (curr != NULL)
         {
-            /*fprintf(stderr, "Next %p\n",
-                    (unsigned long *)curr);*/
             curr = curr->sched_one;
         }
 

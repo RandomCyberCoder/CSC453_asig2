@@ -662,24 +662,16 @@ void terminateThread(thread victim, int *status, int shouldSD)
         }
     }
 
-    /*Remove the thread from the pool*/
-
-    retStatus = remove_thread_from_pool(victim);
-
-    /*Check if successful*/
-
-    if (retStatus == SYS_FAIL)
-    {
-        perror("Failed to remove thread from pool");
-        exit(EXIT_FAILURE);
-    }
-
     /*Populate status if non-null*/
 
     if (status != NULL)
     {
         *status = victim->status;
     }
+
+    /*Remove the thread from the pool*/
+
+    retStatus = remove_thread_from_pool(victim);
 
     /*Deallocate the threads resources*/
 
@@ -695,6 +687,7 @@ void terminateThread(thread victim, int *status, int shouldSD)
         if (retStatus == SYS_FAIL)
         {
             perror("Failed to unmap region");
+            free(victim);
             exit(EXIT_FAILURE);
         }
     }
@@ -703,4 +696,12 @@ void terminateThread(thread victim, int *status, int shouldSD)
     and free the thread context*/
 
     free(victim);
+
+    /*Check if successful*/
+
+    if (retStatus == SYS_FAIL)
+    {
+        perror("Failed to remove thread from pool");
+        exit(EXIT_FAILURE);
+    }
 }

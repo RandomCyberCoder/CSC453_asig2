@@ -734,11 +734,16 @@ void lwp_set_scheduler(scheduler fun)
     scheduler oldScheduler;
     thread nxtThread;
 
+    if(fun == currentScheduler){
+        return;
+    }
+
     if (fun == NULL && currentScheduler == &rr_publish)
     {
         return;
     }
-    else if (fun == NULL && currentScheduler != &rr_publish)
+    
+    if (fun == NULL && currentScheduler != &rr_publish)
     {
         oldScheduler = currentScheduler;
         currentScheduler = &rr_publish;
